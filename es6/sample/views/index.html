@@ -7,41 +7,39 @@
 </head>
 <body>
 
-<div data-controller-name="CurrencySelector">
-    <p>Select a Currency</p>
-    <select aria-label="Currencies Dropdown" data-outlet-id="currenciesDropDown"></select>
-</div>
+    <div data-controller-name="CurrencySelector">
+        <p>Select a Currency</p>
+        <select aria-label="Currencies Dropdown" data-outlet-id="currenciesDropDown"></select>
+    </div>
 
-<div data-controller-name="ExchangeRatesViewer">
-    <p>
-        Rates for 1 (<span data-outlet-id="selectedCurrencyLabel"></span>)
-    </p>
-    <div data-outlet-id="ratesList"
-         data-child-templates='["client-stack/modules/home/rates.list-row-template.html"]'></div>
-</div>
+    <div data-controller-name="ExchangeRatesViewer">
+        <p>
+            Rates for 1 (<span data-outlet-id="selectedCurrencyLabel"></span>)
+        </p>
+        <div data-outlet-id="ratesList"
+             data-child-templates='["client-stack/modules/home/rates.list-row-template.html"]'></div>
+    </div>
 
-<div data-controller-name="QuickNotifier"></div>
+    <script type="application/javascript"
+            src="{{ url_for('static', filename='libs/stacktrace/stacktrace.min.js') }}"></script>
 
-<script type="application/javascript"
-        src="{{ url_for('static', filename='libs/stacktrace/stacktrace.min.js') }}"></script>
+    <script type="application/javascript">
+        window.onerror = function (msg, file, line, col, error) {
+            StackTrace.fromError(error).then(function (stackframes) {
+                let stringifiedStack = stackframes.map(function (frame) {
+                    return frame.toString();
+                }).join('\n');
 
-<script type="application/javascript">
-    window.onerror = function (msg, file, line, col, error) {
-        StackTrace.fromError(error).then(function (stackframes) {
-            let stringifiedStack = stackframes.map(function (frame) {
-                return frame.toString();
-            }).join('\n');
+                //TODO: Post exception to the a logging service
 
-            //TODO: Post exception to the a logging service
+                console.log(stringifiedStack);
+            }).catch(function (err) {
+                console.log(err.message);
+            });
+        };
+    </script>
 
-            console.log(stringifiedStack);
-        }).catch(function (err) {
-            console.log(err.message);
-        });
-    };
-</script>
-
-<script type="module" src="{{ url_for('static', filename='modules/home/home.js') }}"></script>
+    <script type="module" src="{{ url_for('static', filename='modules/home/home.js') }}"></script>
 
 </body>
 </html>

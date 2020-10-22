@@ -1,9 +1,9 @@
-import $ from "../jquery/jquery.module.js";
+import $ from '../jquery/jquery.module.js';
 
 export default class Plugster {
 
     constructor(name, outlets) {
-        console.log(`${name} Controller Instantiated`);
+        console.log(`${name} Controller Instantiated.`);
         this.name = name;
         this._ = outlets;
         this.childTemplates = {};

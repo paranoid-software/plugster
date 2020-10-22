@@ -1,0 +1,1 @@
+# Plugster (jQuery wrapper framework)

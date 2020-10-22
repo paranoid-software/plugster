@@ -65,9 +65,69 @@ Every outlet defined in a view can be referenced and accessed by its correspondi
 
 It is an instance of class extended from the Plugster Base Class. It must implement an initialization method to prepare all the outlets and dependencies in order to work properly.
 
-## List King Outlet
+## Outlet of type list
 
-TODO: Describe this functionality.
+Sometimes we need to render complex lists using all kind of HTML elements, in that cases we can use a special outlet with a **data-child-template** property set to an array of at least one HTML template for every item of the list. In the next example we specified two templates, the first one will be rendered for normal items inside the list, while the second one will be rendered for "deleted" items; in that way we can separate behavior from design and manage to render every item on the list accordingly to its current state.
+
+```html
+<div data-controller-name="Plugster">
+    <div data-outlet-id="listOutlet"
+        data-child-templates='["list-row-template-normal.html", "list-row-template-deleted.html"]'></div>
+</div>
+```
+
+A template is an HTML independent file in which we can design a complex item using other HTML elements (child outlets), which then will be referenced form within the controller using standard programming. The following examples include two independant HTML files used as templates for a list type outlet.
+
+```html
+<!-- This is a normal child template -->
+<div>
+    <span data-child-outlet-id="someOutlet"></span>: <span data-child-outlet-id="someOtherOutlet"></span>
+</div>
+```
+
+```html
+<!-- This is a deleted child template -->
+<div>
+    <span data-child-outlet-id="someOutlet" class="deleted"></span>: <span data-child-outlet-id="someOtherOutlet"></span>
+    <p>
+        <button data-child-outlet-id="someButtonOutlet">Undelete</button>
+    </p>
+</div>
+```
+
+### Using the outlets on the controller
+
+```javascript
+invalidateRatesList = function (forCurrency) {
+    let self = this;
+    self._.selectedCurrencyLabel.text(forCurrency);
+    self.exchangeRatesSvcs.getLatest(forCurrency).then(function (response) {
+        self._.ratesList.clear();
+        Object.keys(response['rates']).map(function (key) {
+            let rate = response['rates'][key];
+            let itemAsJson = {};
+            itemAsJson[key] = rate;
+            // Here we use the first template specifying its array index 0,
+            // but we can choose which one to use based for example in the item state,
+            // using something like ...List.buildListItem(rate.state == 'deleted'? 1 : 0, key ....
+            let itemOutlets = self._.ratesList.buildListItem(0, key, itemAsJson, {
+                currencyCodeLabel: {},
+                valueLabel: {}
+            });
+            if(!itemOutlets) return null;
+            itemOutlets.root.click(function() {
+                let key = this.dataset['key'];
+                console.log(key);
+                console.log(self._.ratesList.getData(key));
+            });
+            itemOutlets.currencyCodeLabel.text(key);
+            itemOutlets.valueLabel.text(rate);
+        });
+        console.log(self._.ratesList);
+        console.log(self._.ratesList.count());
+    });
+};
+```
 
 ## Plugster Boilerplate
 

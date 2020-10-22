@@ -95,7 +95,7 @@ A template is an HTML independent file in which we can design a complex item usi
 </div>
 ```
 
-### Using the outlets on the controller
+### Using the child outlets whitin the controller
 
 ```javascript
 invalidateRatesList = function (forCurrency) {

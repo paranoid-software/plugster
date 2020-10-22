@@ -31,7 +31,7 @@ The wrapper recognize a view by the existence of a **data-controller-id** attrib
     <div data-controller-name="PlugsterOne">
         <p>Static label</p>
         <!-- This is an outlet -->
-        <select aria-label="Selector label" data-outlet-id="outletName"></select>
+        <select aria-label="Selector label" data-outlet-id="outletId"></select>
     </div>
 
     <!-- This is another plugster view. -->

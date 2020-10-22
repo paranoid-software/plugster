@@ -65,14 +65,15 @@ Every outlet defined in a view can be referenced and accessed by its correspondi
 
 It is an instance of class extended from the Plugster Base Class. It must implement an initialization method to prepare all the outlets and dependencies in order to work properly.
 
-## Outlet of type list
+## List type outlet
 
-Sometimes we need to render complex lists using all kind of HTML elements, in that cases we can use a special outlet with a **data-child-template** property set to an array of at least one HTML template for every item of the list. In the next example we specified two templates, the first one will be rendered for normal items inside the list, while the second one will be rendered for "deleted" items; in that way we can separate behavior from design and manage to render every item on the list accordingly to its current state.
+Sometimes we need to render complex lists using all kind of HTML elements, in that cases we can use a special outlet with a **data-child-templates** property set to an array of at least one HTML template for every item of the list. In the next example we specified two templates, the first one will be rendered for normal items inside the list, while the second one will be rendered for "deleted" items; in that way we can separate behavior from design and manage to render every item on the list accordingly to its current state.
 
 ```html
 <div data-controller-name="Plugster">
     <div data-outlet-id="listOutlet"
         data-child-templates='["list-row-template-normal.html", "list-row-template-deleted.html"]'></div>
+        <!-- We need to pass a json array in this property-->
 </div>
 ```
 

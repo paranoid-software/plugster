@@ -65,12 +65,16 @@ Every outlet defined in a view can be referenced and accessed by its correspondi
 
 It is an instance of class extended from the Plugster Base Class. It must implement an initialization method to prepare all the outlets and dependencies in order to work properly.
 
-### Plugster Boilerplate
+## List King Outlet
+
+TODO: Describe this functionality.
+
+## Plugster Boilerplate
 
 ```javascript
 import Plugster from '../../libs/plugster/plugster.js';
 
-class MyFirstPlugster extends Plugster {
+class WorkingPlugster extends Plugster {
 
     constructor(outlets) {
         super('MyFirstPlugster', outlets);
@@ -80,6 +84,9 @@ class MyFirstPlugster extends Plugster {
         let self = this;
         window.Promise.all(self.bindOutlets()).then(function () {
             console.log(`${self.name} Controller Initialized.`);
+            // We can access our outlets using self._.outletName
+            // for example:
+            console.log(self._.someOutlet);
         });
     };
 
@@ -88,12 +95,12 @@ class MyFirstPlugster extends Plugster {
 // Here we export an instance instead of the classs, because we
 // do not need to instantiate this plugster, the idea is more like
 // having a controller for a specific HTML view or widget.
-export default new MyFirstPlugster({
-    someDropDownOutlet: {}
+export default new WorkingPlugster({
+    someOutlet: {}
 });
 ```
 
-### Plugster Sample
+## Plugster Sample
 
 ```javascript
 import Plugster from '../../libs/plugster/plugster.js';
@@ -149,7 +156,7 @@ export default new MyFirstPlugster({
 });
 ```
 
-### Repository Content
+## Repository Content
 
 In this repository we have 2 versions for the wrapper; the main version is written usin ES6 standard and it is located at the "es6" folder. But we also publish a version based on the "Revealing Module Pattern" in case we need to work in a legacy project based on that pattern.
 

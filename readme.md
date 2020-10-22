@@ -31,7 +31,7 @@ The wrapper recognize a view by the existence of a **data-controller-id** attrib
     <div data-controller-name="PlugsterOne">
         <p>Static label</p>
         <!-- This is an outlet -->
-        <select aria-label="Selector label" data-outlet-id="outletName"></select>
+        <select aria-label="Selector label" data-outlet-id="outletId"></select>
     </div>
 
     <!-- This is another plugster view. -->
@@ -39,12 +39,14 @@ The wrapper recognize a view by the existence of a **data-controller-id** attrib
         <p>
             Static label: <span data-outlet-id="outletId"></span>
         </p>
-        <!-- This is a "list kind" outlet; every outlet of this kind can have one or more row templates (Standalone and independent HTML files which contains the list items elements). -->
+        <!-- This is a "list kind" outlet; every outlet of this kind can have one or more row
+            templates (Standalone and independent HTML files which contains the list items elements). -->
         <div data-outlet-id="outletId"
              data-child-templates='["list-row-template.html"]'></div>
     </div>
 
-    <!-- Thanks to ECMAScript 6 we can use modules, wich can contain all the controllers needed by the page. -->
+    <!-- Thanks to ECMAScript 6 we can use modules, wich can contain 
+        all the controllers needed by the page. -->
     <script type="module" src="module.js"></script>
 
 </body>
@@ -62,6 +64,36 @@ Every outlet defined in a view can be referenced and accessed by its correspondi
 ### The controller
 
 It is an instance of class extended from the Plugster Base Class. It must implement an initialization method to prepare all the outlets and dependencies in order to work properly.
+
+### Plugster Boilerplate
+
+```javascript
+import Plugster from '../../libs/plugster/plugster.js';
+
+class MyFirstPlugster extends Plugster {
+
+    constructor(outlets) {
+        super('MyFirstPlugster', outlets);
+    };
+
+    init = function () {
+        let self = this;
+        window.Promise.all(self.bindOutlets()).then(function () {
+            console.log(`${self.name} Controller Initialized.`);
+        });
+    };
+
+}
+
+// Here we export an instance instead of the classs, because we
+// do not need to instantiate this plugster, the idea is more like
+// having a controller for a specific HTML view or widget.
+export default new MyFirstPlugster({
+    someDropDownOutlet: {}
+});
+```
+
+### Plugster Sample
 
 ```javascript
 import Plugster from '../../libs/plugster/plugster.js';
@@ -115,4 +147,20 @@ class MyFirstPlugster extends Plugster {
 export default new MyFirstPlugster({
     someDropDownOutlet: {}
 });
+```
+
+### Repository Content
+
+In this repository we have 2 versions for the wrapper; the main version is written usin ES6 standard and it is located at the "es6" folder. But we also publish a version based on the "Revealing Module Pattern" in case we need to work in a legacy project based on that pattern.
+
+```lang-none
+plugster
+└───es6
+│   └───sample
+│   └───src
+└───revealing-module-pattern
+│   └───sample
+│   └───src
+│   LICENSE.md
+│   readme.md
 ```

@@ -112,7 +112,7 @@ class MyFirstPlugster extends Plugster {
 
 }
 
-export default new CurrencySelector({
+export default new MyFirstPlugster({
     someDropDownOutlet: {}
 });
 ```

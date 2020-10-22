@@ -14,7 +14,7 @@ A plugster (._.) is a standalone view controller, which can access in a clean wa
 
 ### The view
 
-It can be any HTML element inside a page, but it is commonly a `<div>` element; and you can have as many "views" as you need inside the same HTML page.
+It can be any HTML element inside a page (even the body or the head section), but it is commonly a `<div>` element; and you can have as many "views" as you need inside the same HTML page.
 
 ```html
 <!DOCTYPE html>
@@ -22,24 +22,27 @@ It can be any HTML element inside a page, but it is commonly a `<div>` element; 
 <head>
     <meta charset="UTF-8">
     <title>Some Title</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles/shared.css') }}"/>
 </head>
 <body>
 
-    <!-- This is plugster view -->
-    <div data-controller-name="PlugsterOneName">
+    <!-- This is plugster view. -->
+    <div data-controller-name="PlugsterOne">
         <p>Static label</p>
         <select aria-label="Selector label" data-outlet-id="outletName"></select>
     </div>
 
-    <!-- This is another plugster view -->
-    <div data-controller-name="PlugsterTwoName">
+    <!-- This is another plugster view. -->
+    <div data-controller-name="PlugsterTwo">
         <p>
-            Static label: <span data-outlet-id="outletName"></span>
+            Static label: <span data-outlet-id="outletId"></span>
         </p>
-        <div data-outlet-id="thisIsAList"
+        <!-- This is a "list" outlet; every list can have one or more row templates, wich are also standalone and independent HTML files. -->
+        <div data-outlet-id="outletId"
              data-child-templates='["list-row-template.html"]'></div>
     </div>
+
+    <!-- Thanks to ECMAScript 6 we can use modules, wich can contain all the controllers needed by the page. -->
+    <script type="module" src="module.js"></script>
 
 </body>
 </html>

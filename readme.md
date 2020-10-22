@@ -158,7 +158,7 @@ plugster
 └───es6
 │   └───sample
 │   └───src
-└───revealing-model-pattern
+└───revealing-module-pattern
 │   └───sample
 │   └───src
 │   LICENSE.md

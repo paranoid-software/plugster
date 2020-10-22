@@ -93,10 +93,10 @@ class MyFirstPlugster extends Plugster {
         });
 
         self._.someDropDownOutlet.append(new Option(1, 'Argentina'));
-        self._.someDropDownOutlet.append(new Option(1, 'Colombia'));
-        self._.someDropDownOutlet.append(new Option(1, 'Ecuador'));
-        self._.someDropDownOutlet.append(new Option(1, 'Perú'));
-        self._.someDropDownOutlet.append(new Option(1, 'Usa'));
+        self._.someDropDownOutlet.append(new Option(2, 'Colombia'));
+        self._.someDropDownOutlet.append(new Option(3, 'Ecuador'));
+        self._.someDropDownOutlet.append(new Option(4, 'Perú'));
+        self._.someDropDownOutlet.append(new Option(5, 'Usa'));
 
     };
 

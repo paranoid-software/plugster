@@ -99,32 +99,36 @@ A template is an HTML independent file in which we can design a complex item usi
 ### Using the child outlets whitin the controller
 
 ```javascript
-invalidateRatesList = function (forCurrency) {
-    let self = this;
-    self._.selectedCurrencyLabel.text(forCurrency);
-    self.exchangeRatesSvcs.getLatest(forCurrency).then(function (response) {
-        self._.ratesList.clear();
-        Object.keys(response['rates']).map(function (key) {
-            let rate = response['rates'][key];
-            let itemAsJson = {};
-            itemAsJson[key] = rate;
-            // Here we use the first template specifying its array index 0,
-            // but we can choose which one to use based for example in the item state,
-            // using something like ...List.buildListItem(rate.state == 'deleted'? 1 : 0, key ....
-            let itemOutlets = self._.ratesList.buildListItem(0, key, itemAsJson, {
-                currencyCodeLabel: {},
-                valueLabel: {}
+...
+
+    invalidateRatesList(forCurrency) {
+        let self = this;
+        self._.selectedCurrencyLabel.text(forCurrency);
+        self.exchangeRatesSvcs.getLatest(forCurrency).then(function (response) {
+            self._.ratesList.clear();
+            Object.keys(response['rates']).map(function (key) {
+                let rate = response['rates'][key];
+                let itemAsJson = {};
+                itemAsJson[key] = rate;
+                // Here we use the first template specifying its array index 0,
+                // but we can choose which one to use based for example in the item state,
+                // using something like ...List.buildListItem(rate.state == 'deleted'? 1 : 0, key ....
+                let itemOutlets = self._.ratesList.buildListItem(0, key, itemAsJson, {
+                    currencyCodeLabel: {},
+                    valueLabel: {}
+                });
+                if(!itemOutlets) return null;
+                itemOutlets.root.click(function() {
+                    let key = this.dataset['key'];
+                    console.log([key, self._.ratesList.getData(key)]);
+                });
+                itemOutlets.currencyCodeLabel.text(key);
+                itemOutlets.valueLabel.text(rate);
             });
-            if(!itemOutlets) return null;
-            itemOutlets.root.click(function() {
-                let key = this.dataset['key'];
-                console.log([key, self._.ratesList.getData(key)]);
-            });
-            itemOutlets.currencyCodeLabel.text(key);
-            itemOutlets.valueLabel.text(rate);
         });
-    });
-};
+    }
+
+...
 ```
 
 ## Plugster Boilerplate
@@ -136,7 +140,7 @@ class WorkingPlugster extends Plugster {
 
     constructor(outlets) {
         super(outlets);
-    };
+    }
 
     afterInit() {
         // This is our entry point to the plugser,
@@ -145,7 +149,7 @@ class WorkingPlugster extends Plugster {
 
         let self = this;
         self._.someOutlet....
-    };
+    }
 
 }
 
@@ -168,7 +172,7 @@ class MyFirstPlugster extends Plugster {
         super(outlets);
     };
 
-    afterInit = function () {
+    afterInit() {
 
         let self = this;
 
@@ -182,15 +186,15 @@ class MyFirstPlugster extends Plugster {
         self._.someDropDownOutlet.append(new Option(4, 'Perú'));
         self._.someDropDownOutlet.append(new Option(5, 'Usa'));
 
-    };
+    }
 
-    notifyValueSelection = function (value) {
+    notifyValueSelection(value) {
         this.dispatchEvent(this.changed.name, {value: value})
-    };
+    }
 
-    changed = function (data, callback) {
+    changed(data, callback) {
         this.registerEventSignature(this.changed.name, data, callback);
-    };
+    }
 
 }
 
@@ -210,9 +214,9 @@ Plugster exposes two methods to enable this type of communication:
 ```javascript
 ...
 
-    changed = function (data, callback) {
+    changed(data, callback) {
         this.registerEventSignature(this.changed.name, data, callback);
-    };
+    }
 
 }
 ```
@@ -222,9 +226,9 @@ Plugster exposes two methods to enable this type of communication:
 ```javascript
 ...
 
-    notifyValueSelection = function (value) {
+    notifyValueSelection(value) {
         this.dispatchEvent(this.changed.name, {value: value})
-    };
+    }
 
 ...
 ```

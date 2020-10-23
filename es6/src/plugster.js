@@ -2,18 +2,36 @@ import $ from '../jquery/jquery.module.js';
 
 export default class Plugster {
 
-    constructor(name, outlets) {
-        console.log(`${name} Controller Instantiated.`);
-        this.name = name;
+    constructor(outlets) {
+        this.name = this.constructor.name;
+
+        console.log(`${this.name} Controller Instantiated.`);
+
         this._ = outlets;
         this.childTemplates = {};
+        this.init();
     };
 
-    bindOutlets = function () {
-
+    init() {
         let self = this;
 
         console.log(`Initializing ${self.name} Controller.`);
+
+        self.bindOutlets(function() {
+            console.log(`${self.name} Controller Initialized`);
+            // Here we are invoking the extended class "afterInit" method
+            self.afterInit();
+        });
+    }
+
+    afterInit() {
+        throw new Error('You have to implement the Plugster afterInit method !!!');
+    }
+
+    bindOutlets(afterBind) {
+
+        let self = this;
+
         console.log(`Binding Outlets for ${self.name} Controller.`);
 
         let childTemplatesLoadPromises = [];
@@ -77,36 +95,38 @@ export default class Plugster {
 
         console.log(`Outlets for ${self.name} Controller were binded successfuly !!!`);
 
-        return childTemplatesLoadPromises;
+        window.Promise.all(childTemplatesLoadPromises).then(function() {
+            afterBind();
+        });
 
-    };
+    }
 
-    loadChildTemplate = function (outletName, index, file, deferred) {
+    loadChildTemplate(outletName, index, file, deferred) {
         let self = this;
         $.get({url: file, cache: false}, function (html) {
             self.childTemplates[`${outletName}_${index}`] = html;
             console.log(`Template ${file} loaded.`);
             deferred.resolve();
         });
-    };
+    }
 
-    compileChildTemplate = function (child, outletsSchema) {
+    compileChildTemplate(template, outletsSchema) {
         // TODO: Validate schema compliance.
         if(!outletsSchema || Object.keys(outletsSchema).length === 0) return null;
         let outlets = {};
-        outlets.root = child;
-        $.map(child.find('[data-child-outlet-id]'), function (outlet) {
+        outlets.root = template;
+        $.map(template.find('[data-child-outlet-id]'), function (outlet) {
             outlets[$(outlet).data('child-outlet-id')] = $(outlet);
         });
         return outlets;
-    };
+    }
 
-    trigger = function (eventName, args) {
-        $(this).trigger(new $.Event(eventName, {args: args}));
-    };
+    registerEventSignature(name, data, callback) {
+        $(this).on(name, data, callback);
+    }
 
-    on = function (eventName, args, callback) {
-        $(this).on(eventName, args, callback);
-    };
+    dispatchEvent(name, args) {
+        $(this).trigger(new $.Event(name, {args: args}));
+    }
 
 }

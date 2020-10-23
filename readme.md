@@ -143,7 +143,8 @@ class WorkingPlugster extends Plugster {
         // here we can start coding the Plugster behavior
         // and using the declared outlets.
 
-        sel._.someOutlet....
+        let self = this;
+        self._.someOutlet....
     };
 
 }

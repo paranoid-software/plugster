@@ -1,132 +1,111 @@
-﻿import $ from '../jquery/jquery.module.js';
+﻿'use strict';
 
-export default class Plugster {
+let __plugster = function (name, outlets) {
 
-    constructor(outlets) {
-        this.name = this.constructor.name;
+    let
+        self = this,
+        childTemplates = {},
+        compileChildTemplate = function (child, outletsSchema) {
+            // TODO: Validate schema compliance.
+            if (!outletsSchema || Object.keys(outletsSchema).length === 0) return null;
+            let outlets = {};
+            outlets.root = child;
+            $.map(child.find('[data-child-outlet-id]'), function (outlet) {
+                outlets[$(outlet).data('child-outlet-id')] = $(outlet);
+            });
+            return outlets;
+        },
+        loadChildTemplate = function (outletName, index, file, deferred) {
+            $.get({url: file, cache: false}, function (html) {
+                childTemplates[String.format('{0}_{1}', outletName, index)] = html;
+                console.log(String.format('Template {0} loaded.', file));
+                deferred.resolve();
+            });
+        },
+        bindOutlets = function () {
 
-        console.log(`${this.name} Controller Instantiated.`);
+            console.log(String.format('Binding Outlets for {0} Controller.', name));
 
-        this._ = outlets;
-        this.childTemplates = {};
-        this.init();
+            let childTemplatesLoadPromises = [];
+            if ($(String.format('[data-controller-name={0}]', name)).length === 0) throw new Error(String.format('There is no view with a {0} controller !!!', name));
+
+            let root = $(String.format('[data-controller-name={0}]', name));
+
+            $.map(self.outlets, function (outlet, key) {
+
+                let selector = String.format('[data-outlet-id="{0}"]', key);
+                if (root.find(selector).length === 0) throw new Error(String.format('Outlet {0} does not exist, check both {1} view and controller !!!', key, name));
+
+                let filteredOutlet = root.find(selector);
+                if (filteredOutlet.length > 1) {
+                    let filteredOutlets = $.map(filteredOutlet, function (o) {
+                        if ($(o).closest('[data-controller-name]').data('controller-name') === name) return $(o);
+                        return null;
+                    });
+                    filteredOutlet = filteredOutlets[0];
+                }
+
+                if (filteredOutlet.data('child-templates')) {
+                    filteredOutlet.buildListItem = function (withTemplateIndex, itemKey, jsonData, outletsSchema) {
+                        if (!this.items) this.items = {};
+                        if (!this.items[itemKey]) this.items[itemKey] = {};
+                        this.append(childTemplates[String.format('{0}_{1}', key, withTemplateIndex)]);
+                        let outlets = compileChildTemplate(this.children().last(), outletsSchema);
+                        if (outlets === null) return null;
+                        outlets.root.attr('data-key', itemKey);
+                        this.items[itemKey].outlets = outlets;
+                        this.items[itemKey].data = jsonData;
+                        return this.items[itemKey].outlets;
+                    };
+                    filteredOutlet.count = function () {
+                        return Object.keys(this.items).length;
+                    };
+                    filteredOutlet.getData = function (key) {
+                        return this.items[key].data;
+                    };
+                    filteredOutlet.getOutlets = function (key) {
+                        return this.items[key].outlets;
+                    };
+                    filteredOutlet.clear = function () {
+                        this.items = undefined;
+                        this.children().remove();
+                    };
+                    let templates = filteredOutlet.data('child-templates');
+                    $.map(templates, function (childTemplate, index) {
+                        let deferred = $.Deferred();
+                        childTemplatesLoadPromises.push(deferred.promise());
+                        loadChildTemplate(key, index, childTemplate, deferred);
+                    });
+                }
+
+                self.outlets[key] = filteredOutlet;
+
+            });
+
+            outlets.root = root;
+
+            console.log(String.format('Outlets for {0} Controller were binded successfuly !!!', name));
+
+            return childTemplatesLoadPromises;
+
+        };
+
+    self.name = name;
+    self.outlets = outlets;
+
+    self._init = function () {
+        console.log(String.format('Initializing {0} Controller', name));
+        return bindOutlets();
     };
 
-    init() {
-        let self = this;
+    self.trigger = function (eventName, args) {
+        $(this).trigger(new jQuery.Event(eventName, {args: args}));
+    };
 
-        console.log(`Initializing ${self.name} Controller.`);
+    self.on = function (eventName, args, callback) {
+        $(this).on(eventName, args, callback);
+    };
 
-        self.bindOutlets(function() {
-            console.log(`${self.name} Controller Initialized`);
-            // Here we are invoking the extended class "afterInit" method
-            self.afterInit();
-        });
-    }
+    console.log(String.format('{0} Controller Instantiated', name));
 
-    afterInit() {
-        throw new Error('You have to implement the Plugster afterInit method !!!');
-    }
-
-    bindOutlets(afterBind) {
-
-        let self = this;
-
-        console.log(`Binding Outlets for ${self.name} Controller.`);
-
-        let childTemplatesLoadPromises = [];
-        let controllerSelectorSentence = `[data-controller-name=${self.name}]`;
-        if ($(controllerSelectorSentence).length === 0) throw new Error(`There is no view with a ${self.name} controller !!!`);
-
-        let root = $(controllerSelectorSentence);
-
-        $.map(self._, function (outlet, key) {
-
-            let selector = `[data-outlet-id='${key}']`;
-            if (root.find(selector).length === 0) throw new Error(`Outlet ${key} does not exist, check both ${self.name} view and controller !!!`);
-
-            let filteredOutlet = root.find(selector);
-            if (filteredOutlet.length > 1) {
-                let filteredOutlets = $.map(filteredOutlet, function (o) {
-                    if ($(o).closest('[data-controller-name]').data('controller-name') === self.name) return $(o);
-                    return null;
-                });
-                filteredOutlet = filteredOutlets[0];
-            }
-
-            if (filteredOutlet.data('child-templates')) {
-                filteredOutlet.buildListItem = function (withTemplateIndex, itemKey, jsonData, outletsSchema) {
-                    if (!this.items) this.items = {};
-                    if (!this.items[itemKey]) this.items[itemKey] = {};
-                    this.append(self.childTemplates[`${key}_${withTemplateIndex}`]);
-                    let outlets = self.compileChildTemplate(this.children().last(), outletsSchema);
-                    if(outlets === null) return null;
-                    outlets.root.attr('data-key', itemKey);
-                    this.items[itemKey].outlets = outlets;
-                    this.items[itemKey].data = jsonData;
-                    return this.items[itemKey].outlets;
-                };
-                filteredOutlet.count = function() {
-                  return Object.keys(this.items).length;
-                };
-                filteredOutlet.getData = function(key) {
-                  return this.items[key].data;
-                };
-                filteredOutlet.getOutlets = function(key) {
-                  return this.items[key].outlets;
-                };
-                filteredOutlet.clear = function () {
-                    this.items = undefined;
-                    this.children().remove();
-                };
-                let templates = filteredOutlet.data('child-templates');
-                $.map(templates, function (childTemplate, index) {
-                    let deferred = $.Deferred();
-                    childTemplatesLoadPromises.push(deferred.promise());
-                    self.loadChildTemplate(key, index, childTemplate, deferred);
-                });
-            }
-
-            self._[key] = filteredOutlet;
-
-        });
-
-        self._.root = root;
-
-        console.log(`Outlets for ${self.name} Controller were binded successfuly !!!`);
-
-        window.Promise.all(childTemplatesLoadPromises).then(function() {
-            afterBind();
-        });
-
-    }
-
-    loadChildTemplate(outletName, index, file, deferred) {
-        let self = this;
-        $.get({url: file, cache: false}, function (html) {
-            self.childTemplates[`${outletName}_${index}`] = html;
-            console.log(`Template ${file} loaded.`);
-            deferred.resolve();
-        });
-    }
-
-    compileChildTemplate(template, outletsSchema) {
-        // TODO: Validate schema compliance.
-        if(!outletsSchema || Object.keys(outletsSchema).length === 0) return null;
-        let outlets = {};
-        outlets.root = template;
-        $.map(template.find('[data-child-outlet-id]'), function (outlet) {
-            outlets[$(outlet).data('child-outlet-id')] = $(outlet);
-        });
-        return outlets;
-    }
-
-    registerEventSignature(name, data, callback) {
-        $(this).on(name, data, callback);
-    }
-
-    dispatchEvent(name, args) {
-        $(this).trigger(new $.Event(name, {args: args}));
-    }
-
-}
+};

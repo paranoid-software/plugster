@@ -14,24 +14,24 @@ class CurrencySelector extends Plugster {
         let self = this;
 
         self._.currenciesDropDown.on('change', function () {
-            self.notifyValueSelection(this.value);
+            self.notifyCurrencySelection(this.value);
         });
 
         self.currenciesSvcs.getAll().then(function (response) {
             Object.keys(response).map(function (key) {
                 self._.currenciesDropDown.append(new Option(response[key], key));
             });
-            self.notifyValueSelection(self._.currenciesDropDown.first().val());
+            self.notifyCurrencySelection(self._.currenciesDropDown.first().val());
         });
 
     }
 
-    notifyValueSelection(value) {
-        this.dispatchEvent(this.changed.name, {value: value})
+    notifyCurrencySelection(value) {
+        this.dispatchEvent(this.currencyChanged.name, {value: value})
     }
 
-    changed(data, callback) {
-        this.registerEventSignature(this.changed.name, data, callback);
+    currencyChanged(data, callback) {
+        this.registerEventSignature(this.currencyChanged.name, data, callback);
     }
 
 }

@@ -23,31 +23,31 @@ The wrapper recognize a view by the existence of a **data-controller-id** attrib
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Some Title</title>
+    <title>My New Web Application</title>
 </head>
 <body>
 
     <!-- This is plugster view. -->
-    <div data-controller-name="PlugsterOne">
+    <div data-controller-name="MyFirstPlugster">
         <p>Static label</p>
         <!-- This is an outlet -->
-        <select aria-label="Selector label" data-outlet-id="outletId"></select>
+        <select aria-label="Selector label" data-outlet-id="someOutletId"></select>
     </div>
 
     <!-- This is another plugster view. -->
-    <div data-controller-name="PlugsterTwo">
+    <div data-controller-name="MySecondPlugster">
         <p>
-            Static label: <span data-outlet-id="outletId"></span>
+            Static label: <span data-outlet-id="someOtherOutletId"></span>
         </p>
         <!-- This is a "list kind" outlet; every outlet of this kind can have one or more row
             templates (Standalone and independent HTML files which contains the list items elements). -->
-        <div data-outlet-id="outletId"
+        <div data-outlet-id="listOutletId"
              data-child-templates='["list-row-template.html"]'></div>
     </div>
 
     <!-- Thanks to ECMAScript 6 we can use modules, wich can contain 
         all the controllers needed by the page. -->
-    <script type="module" src="module.js"></script>
+    <script type="module" src="my-module.js"></script>
 
 </body>
 </html>
@@ -70,9 +70,9 @@ It is an instance of class extended from the Plugster Base Class. It must implem
 Sometimes we need to render complex lists using all kind of HTML elements, in that cases we can use a special outlet with a **data-child-templates** property set to an array of at least one HTML template for every item of the list. In the next example we specified two templates, the first one will be rendered for normal items inside the list, while the second one will be rendered for "deleted" items; in that way we can separate behavior from design and manage to render every item on the list accordingly to its current state.
 
 ```html
-<div data-controller-name="Plugster">
-    <div data-outlet-id="listOutlet"
-        data-child-templates='["list-row-template-normal.html", "list-row-template-deleted.html"]'></div>
+<div data-controller-name="MySecondPlugster">
+    <div data-outlet-id="listOutletId"
+        data-child-templates='["list-normal-row-template.html", "list-deleted-row-template.html"]'></div>
         <!-- We need to pass a json array in this property-->
 </div>
 ```
@@ -82,16 +82,16 @@ A template is an HTML independent file in which we can design a complex item usi
 ```html
 <!-- This is a normal child template -->
 <div>
-    <span data-child-outlet-id="someOutlet"></span>: <span data-child-outlet-id="someOtherOutlet"></span>
+    <span data-child-outlet-id="someOutletId"></span>: <span data-child-outlet-id="someOtherOutletId"></span>
 </div>
 ```
 
 ```html
 <!-- This is a deleted child template -->
 <div>
-    <span data-child-outlet-id="someOutlet" class="deleted"></span>: <span data-child-outlet-id="someOtherOutlet"></span>
+    <span data-child-outlet-id="someOutletId" class="deleted"></span>: <span data-child-outlet-id="someOtherOutletId"></span>
     <p>
-        <button data-child-outlet-id="someButtonOutlet">Undelete</button>
+        <button data-child-outlet-id="someButtonOutletId">Undelete</button>
     </p>
 </div>
 ```
@@ -151,6 +151,10 @@ class WorkingPlugster extends Plugster {
         self._.someOutlet....
     }
 
+    someEvent(data, callback) {
+        this.registerEventSignature(this.someEvent.name, data, callback);
+    }
+
 }
 
 // Here we export an instance instead of the classs, because we
@@ -189,11 +193,11 @@ class MyFirstPlugster extends Plugster {
     }
 
     notifyValueSelection(value) {
-        this.dispatchEvent(this.changed.name, {value: value})
+        this.dispatchEvent(this.valueChanged.name, {value: value})
     }
 
-    changed(data, callback) {
-        this.registerEventSignature(this.changed.name, data, callback);
+    valueChanged(data, callback) {
+        this.registerEventSignature(this.valueChanged.name, data, callback);
     }
 
 }
@@ -214,8 +218,8 @@ Plugster exposes two methods to enable this type of communication:
 ```javascript
 ...
 
-    changed(data, callback) {
-        this.registerEventSignature(this.changed.name, data, callback);
+    valueChanged(data, callback) {
+        this.registerEventSignature(this.valueChanged.name, data, callback);
     }
 
 }
@@ -227,7 +231,7 @@ Plugster exposes two methods to enable this type of communication:
 ...
 
     notifyValueSelection(value) {
-        this.dispatchEvent(this.changed.name, {value: value})
+        this.dispatchEvent(this.valueChanged.name, {value: value})
     }
 
 ...

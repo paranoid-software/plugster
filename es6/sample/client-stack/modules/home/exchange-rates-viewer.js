@@ -6,18 +6,10 @@ class ExchangeRatesViewer extends Plugster {
     exchangeRatesSvcs = new ExchangeRatesServices();
 
     constructor(outlets) {
-        super('ExchangeRatesViewer', outlets);
+        super(outlets);
     };
 
-    init = function () {
-        let self = this;
-        window.Promise.all(self.bindOutlets()).then(function () {
-            console.log(`${self.name} Controller Initialized`);
-            self.afterInit();
-        });
-    };
-
-    afterInit = function () {
+    afterInit() {
 
         let self = this;
 
@@ -25,9 +17,9 @@ class ExchangeRatesViewer extends Plugster {
             console.log(this.innerText);
         });
 
-    };
+    }
 
-    invalidateRatesList = function (forCurrency) {
+    invalidateRatesList(forCurrency) {
         let self = this;
         self._.selectedCurrencyLabel.text(forCurrency);
         self.exchangeRatesSvcs.getLatest(forCurrency).then(function (response) {
@@ -43,16 +35,13 @@ class ExchangeRatesViewer extends Plugster {
                 if(!itemOutlets) return null;
                 itemOutlets.root.click(function() {
                     let key = this.dataset['key'];
-                    console.log(key);
-                    console.log(self._.ratesList.getData(key));
+                    console.log([key, self._.ratesList.getData(key)]);
                 });
                 itemOutlets.currencyCodeLabel.text(key);
                 itemOutlets.valueLabel.text(rate);
             });
-            console.log(self._.ratesList);
-            console.log(self._.ratesList.count());
         });
-    };
+    }
 
 }
 

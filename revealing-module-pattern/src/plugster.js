@@ -103,11 +103,11 @@ let __plugster = function (name, outlets) {
         });
     };
 
-    self.trigger = function (eventName, args) {
+    self.dispatchEvent = function (eventName, args) {
         $(this).trigger(new jQuery.Event(eventName, {args: args}));
     };
 
-    self.on = function (eventName, args, callback) {
+    self.registerEventSignature = function (eventName, args, callback) {
         $(this).on(eventName, args, callback);
     };
 

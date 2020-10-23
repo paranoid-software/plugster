@@ -9,23 +9,20 @@
         let
             self,
             _,
-            eventsDefinitions = {
-                changed: 'changed'
-            },
-            notifyValueSelection = function(value) {
-                self.trigger(eventsDefinitions.changed, { value: value })
+            notifyCurrencySelection = function(value) {
+                self.dispatchEvent(self.currencyChanged.name, { value: value })
             },
             afterInit = function () {
 
                 _.currenciesDropDown.on('change', function () {
-                    notifyValueSelection(this.value);
+                    notifyCurrencySelection(this.value);
                 });
 
                 currenciesSvc.getAll().then(function(response) {
                    Object.keys(response).map(function(key) {
                        _.currenciesDropDown.append(new Option(response[key], key));
                    });
-                   notifyValueSelection(_.currenciesDropDown.first().val());
+                   notifyCurrencySelection(_.currenciesDropDown.first().val());
                 });
 
             };
@@ -38,8 +35,8 @@
                     afterInit();
                 });
             },
-            changed: function (data, callback) {
-                self.on(eventsDefinitions.changed, data, callback);
+            currencyChanged: function (data, callback) {
+                self.registerEventSignature(this.currencyChanged.name, data, callback);
             }
         };
 

@@ -25,14 +25,11 @@
                         if(!itemOutlets) return null;
                         itemOutlets.root.click(function() {
                             let key = this.dataset['key'];
-                            console.log(key);
-                            console.log(_.ratesList.getData(key));
+                            console.log([key, _.ratesList.getData(key)]);
                         });
                         itemOutlets.currencyCodeLabel.text(key);
                         itemOutlets.valueLabel.text(rate);
                     });
-                    console.log(_.ratesList);
-                    console.log(_.ratesList.count());
                 });
             },
             afterInit = function () {
@@ -50,8 +47,7 @@
             init: function () {
                 self = this;
                 _ = self.outlets;
-                window.Promise.all(self._init()).then(function () {
-                    console.log(String.format('{0} Controller Initialized', self.name));
+                self._init(function() {
                     afterInit();
                 });
             }

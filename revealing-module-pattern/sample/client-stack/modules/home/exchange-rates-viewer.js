@@ -33,7 +33,7 @@
                 });
             },
             afterInit = function () {
-                currencySelector.changed({}, function (e) {
+                currencySelector.currencyChanged({}, function (e) {
                     _.selectedCurrencyLabel.text(e.args.value);
                     invalidateRatesList(e.args.value);
                 });

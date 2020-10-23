@@ -22,7 +22,7 @@ let __plugster = function (name, outlets) {
                 deferred.resolve();
             });
         },
-        bindOutlets = function () {
+        bindOutlets = function (afterBind) {
 
             console.log(String.format('Binding Outlets for {0} Controller.', name));
 
@@ -86,16 +86,21 @@ let __plugster = function (name, outlets) {
 
             console.log(String.format('Outlets for {0} Controller were binded successfuly !!!', name));
 
-            return childTemplatesLoadPromises;
+            window.Promise.all(childTemplatesLoadPromises).then(function() {
+                afterBind();
+            });
 
         };
 
     self.name = name;
     self.outlets = outlets;
 
-    self._init = function () {
+    self._init = function (afterInit) {
         console.log(String.format('Initializing {0} Controller', name));
-        return bindOutlets();
+        return bindOutlets(function() {
+            console.log(String.format('{0} Controller Initialized', self.name));
+            afterInit();
+        });
     };
 
     self.trigger = function (eventName, args) {

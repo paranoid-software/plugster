@@ -16,8 +16,7 @@ __app.modules.shared = (function (shared) {
             init: function () {
                 self = this;
                 _ = self.outlets;
-                window.Promise.all(self._init()).then(function () {
-                    console.log(String.format('{0} Controller Initialized', self.name));
+                self._init(function() {
                     afterInit();
                 });
             },

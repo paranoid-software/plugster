@@ -237,6 +237,17 @@ Plugster exposes two methods to enable this type of communication:
 ...
 ```
 
+Finally in order to respond to the registered event we can invoke the method as follows:
+
+```javascript
+import MyPlugster from './my-plugster.js';
+
+MyPlugster.valueChanged({}, function (e) {
+    console.log(e.args.value);
+    // Do something else with the received data
+});
+```
+
 ## Repository Content
 
 In this repository we have 2 versions for the wrapper; the main version is written usin ES6 standard and it is located at the "es6" folder. But we also publish a version based on the "Revealing Module Pattern" in case we need to work in a legacy project based on that pattern.

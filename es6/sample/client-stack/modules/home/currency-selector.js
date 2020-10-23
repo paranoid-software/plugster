@@ -4,23 +4,12 @@ import CurrenciesServices from '../../services/currencies.js';
 class CurrencySelector extends Plugster {
 
     currenciesSvcs = new CurrenciesServices();
-    eventsDefinitions = {
-        changed: 'changed'
-    };
 
     constructor(outlets) {
-        super('CurrencySelector', outlets);
+        super(outlets);
     };
 
-    init = function () {
-        let self = this;
-        window.Promise.all(self.bindOutlets()).then(function () {
-            console.log(`${self.name} Controller Initialized.`);
-            self.afterInit();
-        });
-    };
-
-    afterInit = function () {
+    afterInit() {
 
         let self = this;
 
@@ -35,17 +24,15 @@ class CurrencySelector extends Plugster {
             self.notifyValueSelection(self._.currenciesDropDown.first().val());
         });
 
-    };
+    }
 
-    notifyValueSelection = function (value) {
-        let self = this;
-        self.trigger(self.eventsDefinitions.changed, {value: value})
-    };
+    notifyValueSelection(value) {
+        this.dispatchEvent(this.changed.name, {value: value})
+    }
 
-    changed = function (data, callback) {
-        let self = this;
-        self.on(self.eventsDefinitions.changed, data, callback);
-    };
+    changed(data, callback) {
+        this.registerEventSignature(this.changed.name, data, callback);
+    }
 
 }
 

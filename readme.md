@@ -118,14 +118,11 @@ invalidateRatesList = function (forCurrency) {
             if(!itemOutlets) return null;
             itemOutlets.root.click(function() {
                 let key = this.dataset['key'];
-                console.log(key);
-                console.log(self._.ratesList.getData(key));
+                console.log([key, self._.ratesList.getData(key)]);
             });
             itemOutlets.currencyCodeLabel.text(key);
             itemOutlets.valueLabel.text(rate);
         });
-        console.log(self._.ratesList);
-        console.log(self._.ratesList.count());
     });
 };
 ```
@@ -138,17 +135,15 @@ import Plugster from '../../libs/plugster/plugster.js';
 class WorkingPlugster extends Plugster {
 
     constructor(outlets) {
-        super('MyFirstPlugster', outlets);
+        super(outlets);
     };
 
-    init = function () {
-        let self = this;
-        window.Promise.all(self.bindOutlets()).then(function () {
-            console.log(`${self.name} Controller Initialized.`);
-            // We can access our outlets using self._.outletName
-            // for example:
-            console.log(self._.someOutlet);
-        });
+    afterInit() {
+        // This is our entry point to the plugser,
+        // here we can start coding the Plugster behavior
+        // and using the declared outlets.
+
+        sel._.someOutlet....
     };
 
 }
@@ -168,20 +163,8 @@ import Plugster from '../../libs/plugster/plugster.js';
 
 class MyFirstPlugster extends Plugster {
 
-    eventsDefinitions = {
-        changed: 'changed'
-    };
-
     constructor(outlets) {
-        super('MyFirstPlugster', outlets);
-    };
-
-    init = function () {
-        let self = this;
-        window.Promise.all(self.bindOutlets()).then(function () {
-            console.log(`${self.name} Controller Initialized.`);
-            self.afterInit();
-        });
+        super(outlets);
     };
 
     afterInit = function () {
@@ -201,13 +184,11 @@ class MyFirstPlugster extends Plugster {
     };
 
     notifyValueSelection = function (value) {
-        let self = this;
-        self.trigger(self.eventsDefinitions.changed, {value: value})
+        this.dispatchEvent(this.changed.name, {value: value})
     };
 
     changed = function (data, callback) {
-        let self = this;
-        self.on(self.eventsDefinitions.changed, data, callback);
+        this.registerEventSignature(this.changed.name, data, callback);
     };
 
 }
@@ -215,6 +196,36 @@ class MyFirstPlugster extends Plugster {
 export default new MyFirstPlugster({
     someDropDownOutlet: {}
 });
+```
+
+### Events declarations and dispatching
+
+One of the main goals when using Plugster is to enable the adoption of events as the preferred communication mechanism between HTML views or widgets.
+
+Plugster exposes two methods to enable this type of communication:
+
+- **registerEventSignature**, using this method we can add a signature for a defined event, for example:
+
+```javascript
+...
+
+    changed = function (data, callback) {
+        this.registerEventSignature(this.changed.name, data, callback);
+    };
+
+}
+```
+
+- **dispatchEvent**, using this method we can trigger an event from within a Plugster, for example:
+
+```javascript
+...
+
+    notifyValueSelection = function (value) {
+        this.dispatchEvent(this.changed.name, {value: value})
+    };
+
+...
 ```
 
 ## Repository Content

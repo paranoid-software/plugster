@@ -1,9 +1,6 @@
-//import $ from '../jquery/jquery.module.js';
-import 'https://code.jquery.com/jquery-3.1.1.min.js';
+import $ from '../jquery/jquery.module.js';
 
 export default class Plugster {
-
-    static registry = {};
 
     constructor(outlets) {
 
@@ -15,7 +12,11 @@ export default class Plugster {
         this.childTemplates = {};
         this.init();
 
+        if (!Plugster.registry) Plugster.registry = {};
         Plugster.registry[this.name.toLowerCase()] = this;
+
+        if (!Plugster.explicitSubscriptions) Plugster.explicitSubscriptions = {};
+        if (!Plugster.htmlDeclaredSubscriptions) Plugster.htmlDeclaredSubscriptions = {};
 
     };
 
@@ -159,9 +160,6 @@ export default class Plugster {
         this.broadcastHtmlDeclaredSubscriptionsMessages(name, args);
         $(this).trigger(new $.Event(name, {args: args}));
     }
-
-    static explicitSubscriptions = {};
-    static htmlDeclaredSubscriptions = {};
 
     broadcastExplicitSubscriptionsMessages(name, args) {
         let simpleKey = this.name.toLowerCase();

@@ -19,6 +19,14 @@ class ExchangeRatesViewer extends Plugster {
 
     }
 
+    onNewMessage(plugsterSourceName, eventName, data) {
+        console.log([plugsterSourceName, eventName, data]);
+    }
+
+    handleCurrencyChange(data) {
+        this.invalidateRatesList(data.value);
+    }
+
     invalidateRatesList(forCurrency) {
         let self = this;
         self._.selectedCurrencyLabel.text(forCurrency);

@@ -12,12 +12,20 @@
         <select aria-label="Currencies Dropdown" data-outlet-id="currenciesDropDown"></select>
     </div>
 
-    <div data-controller-name="ExchangeRatesViewer">
+    <div data-controller-name="ExchangeRatesViewer"
+         data-on-currencyselector-currencychanged="handleCurrencyChange">
         <p>
             Rates for 1 (<span data-outlet-id="selectedCurrencyLabel"></span>)
         </p>
         <div data-outlet-id="ratesList"
              data-child-templates='["client-stack/modules/home/rates.list-row-template.html"]'></div>
+    </div>
+
+    <p>Testing multiple subscribers to the same publisher</p>
+
+    <div data-controller-name="Dummy"
+         data-on-currencyselector-currencychanged="handleCurrencyChange">
+        <span data-outlet-id="outlet"></span>
     </div>
 
     <script type="application/javascript"
@@ -39,7 +47,13 @@
         };
     </script>
 
+    <!--
     <script type="module" src="{{ url_for('static', filename='modules/home/home.js') }}"></script>
+    -->
+
+    <script type="module" src="{{ url_for('static', filename='modules/home/currency-selector.js') }}"></script>
+    <script type="module" src="{{ url_for('static', filename='modules/home/exchange-rates-viewer.js') }}"></script>
+    <script type="module" src="{{ url_for('static', filename='modules/home/dummy.js') }}"></script>
 
 </body>
 </html>

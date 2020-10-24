@@ -106,13 +106,13 @@ export default class Plugster {
         // Binding HTML declared subscriptions
         Object.keys(root.data()).map(function (key) {
             let dashed = key.replace(/[A-Z]/g, m => "-" + m.toLowerCase());
-            let splited = dashed.split('-');
-            if (splited.length !== 3) return null;
-            if (splited[0] !== 'on') return null;
+            let parts = dashed.split('-');
+            if (parts.length !== 3) return null;
+            if (parts[0] !== 'on') return null;
             let methodName = root.data(key);
             if(!self[methodName]) throw new Error(`There is no method ${methodName} within the ${self.name} controller !!!`);
-            let plugsterNameLowerCased = splited[1];
-            let eventNameLowerCased = splited[2];
+            let plugsterNameLowerCased = parts[1];
+            let eventNameLowerCased = parts[2];
             if(!Plugster.registry[plugsterNameLowerCased]) throw new Error(`There is no ${plugsterNameLowerCased} controller !!!`);
             let pubMethodsLowerCased = Object.getOwnPropertyNames(Object.getPrototypeOf(Plugster.registry[plugsterNameLowerCased])).map(methodName => {
                 return methodName.toLowerCase();

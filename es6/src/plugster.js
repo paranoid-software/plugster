@@ -1,7 +1,5 @@
 export default class Plugster {
 
-    static registry = {};
-
     constructor(outlets) {
 
         this.name = this.constructor.name;
@@ -12,7 +10,11 @@ export default class Plugster {
         this.childTemplates = {};
         this.init();
 
+        if (!Plugster.registry) Plugster.registry = {};
         Plugster.registry[this.name.toLowerCase()] = this;
+
+        if (!Plugster.explicitSubscriptions) Plugster.explicitSubscriptions = {};
+        if (!Plugster.htmlDeclaredSubscriptions) Plugster.htmlDeclaredSubscriptions = {};
 
     };
 
@@ -156,9 +158,6 @@ export default class Plugster {
         this.broadcastHtmlDeclaredSubscriptionsMessages(name, args);
         $(this).trigger(new $.Event(name, {args: args}));
     }
-
-    static explicitSubscriptions = {};
-    static htmlDeclaredSubscriptions = {};
 
     broadcastExplicitSubscriptionsMessages(name, args) {
         let simpleKey = this.name.toLowerCase();

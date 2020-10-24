@@ -1,5 +1,3 @@
-import $ from "../libs/jquery/jquery.module.js";
-
 export default class ExchangeRatesServices {
     constructor() {
         this.baseEndpoint = 'http://api.frankfurter.app';

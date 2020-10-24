@@ -1,5 +1,3 @@
-import $ from '../jquery/jquery.module.js';
-
 export default class Plugster {
 
     constructor(outlets) {

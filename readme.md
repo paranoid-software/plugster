@@ -211,7 +211,7 @@ export default new MyFirstPlugster({
 
 One of the main goals when using Plugster is to enable the adoption of events as the preferred communication mechanism between HTML views or widgets.
 
-Plugster exposes two methods to enable this type of communication:
+Plugster exposes various mechanisms to enable this type of communication, one of them is to implement two methods in the Plugster which desires to expose an event listener and dispatcher:
 
 - **registerEventSignature**, using this method we can add a signature for a defined event, for example:
 
@@ -237,7 +237,7 @@ Plugster exposes two methods to enable this type of communication:
 ...
 ```
 
-Finally in order to respond to the registered event we can invoke the method as follows:
+Finally in order to respond to the registered event the simplest way is to invoke the Plugster event method as follows:
 
 ```javascript
 import MyPlugster from './my-plugster.js';

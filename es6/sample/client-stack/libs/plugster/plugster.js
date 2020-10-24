@@ -174,10 +174,7 @@ export default class Plugster {
         Object.keys(Plugster.htmlDeclaredSubscriptions).map(function(key) {
             if(key.startsWith(keyPrefix)) {
                 let sub = Plugster.htmlDeclaredSubscriptions[key];
-                if(!sub) return;
-                if(!sub.listener) return;
-                if(!sub.methodName) return;
-                sub.listener[sub.methodName]?.call(sub.listener, args);
+                sub.listener[sub.methodName].call(sub.listener, args);
             }
         });
     }

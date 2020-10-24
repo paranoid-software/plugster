@@ -263,3 +263,7 @@ plugster
 │   LICENSE.md
 │   readme.md
 ```
+
+## Distribution File
+
+[https://cdn.jsdelivr.net/gh/paranoid-software/plugster@1.0.3/es6/dist/plugster.min.js]

@@ -1,7 +1,15 @@
-import CurrencySelector from './currency-selector.js';
-import ExchangeRatesViewer from './exchange-rates-viewer.js';
+import currencySelector from './currency-selector.js';
+import exchangeRatesViewer from './exchange-rates-viewer.js';
 
-CurrencySelector.currencyChanged({}, function (e) {
+console.log(currencySelector.toString());
+console.log(exchangeRatesViewer.toString());
+
+//exchangeRatesViewer.listenTo(currencySelector);
+//exchangeRatesViewer.listenTo(currencySelector, currencySelector.currencyChanged);
+
+/*
+currencySelector.currencyChanged({}, function (e) {
     if (e.args.value === 'USD') alert('USD FTW !!');
-    ExchangeRatesViewer.invalidateRatesList(e.args.value);
+    exchangeRatesViewer.invalidateRatesList(e.args.value);
 });
+*/

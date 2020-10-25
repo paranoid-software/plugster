@@ -65,13 +65,17 @@ export default class Plugster {
             }
 
             if (filteredOutlet.data('child-templates')) {
-                filteredOutlet.buildListItem = function (withTemplateIndex, itemKey, jsonData, outletsSchema) {
+                filteredOutlet.buildListItem = function (withTemplateIndex, itemKey, jsonData, outletsSchema, itemClickCallback) {
                     if (!this.items) this.items = {};
                     if (!this.items[itemKey]) this.items[itemKey] = {};
                     this.append(self.childTemplates[`${key}_${withTemplateIndex}`]);
                     let outlets = self.compileChildTemplate(this.children().last(), outletsSchema);
                     if (outlets === null) return null;
                     outlets.root.attr('data-key', itemKey);
+                    if(itemClickCallback)
+                        outlets.root.click(function() {
+                            itemClickCallback(itemKey, jsonData);
+                        });
                     this.items[itemKey].outlets = outlets;
                     this.items[itemKey].data = jsonData;
                     return this.items[itemKey].outlets;

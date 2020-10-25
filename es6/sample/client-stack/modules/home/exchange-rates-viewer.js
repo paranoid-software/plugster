@@ -39,12 +39,10 @@ class ExchangeRatesViewer extends Plugster {
                 let itemOutlets = self._.ratesList.buildListItem(0, key, itemAsJson, {
                     currencyCodeLabel: {},
                     valueLabel: {}
+                }, function (key, jsonData) {
+                    console.log([key, jsonData]);
                 });
                 if(!itemOutlets) return null;
-                itemOutlets.root.click(function() {
-                    let key = this.dataset['key'];
-                    console.log([key, self._.ratesList.getData(key)]);
-                });
                 itemOutlets.currencyCodeLabel.text(key);
                 itemOutlets.valueLabel.text(rate);
             });

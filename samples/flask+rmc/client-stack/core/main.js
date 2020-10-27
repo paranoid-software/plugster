@@ -16,7 +16,7 @@
 $(document).ready(function () {
 
     window.onerror = function (msg, file, line, col, error) {
-        StackTrace.fromError(error).then(function (stackframes) {
+        StackTrace.fromError(error, {}).then(function (stackframes) {
             let stringifiedStack = stackframes.map(function (frame) {
                 return frame.toString();
             }).join('\n');

@@ -28,15 +28,12 @@
         <span data-outlet-id="outlet"></span>
     </div>
 
-    <script type="application/javascript"
-        src="{{ url_for('static', filename='libs/jquery/jquery-3.1.1.js') }}"></script>
-
-    <script type="application/javascript"
-            src="{{ url_for('static', filename='libs/stacktrace/stacktrace.min.js') }}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js" integrity="sha512-U6K1YLIFUWcvuw5ucmMtT9HH4t0uz3M366qrF5y4vnyH6dgDzndlcGvH/Lz5k8NFh80SN95aJ5rqGZEdaQZ7ZQ==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stacktrace.js/2.0.2/stacktrace.min.js" integrity="sha512-9fotp9F7mNA1AztobpB07lScgCKiN4i2JuRYTl8MxiHQVJs05EJqeUfPWt9OFAKD1QsIVZiNFQSdov9luOT8TA==" crossorigin="anonymous"></script>
 
     <script type="application/javascript">
         window.onerror = function (msg, file, line, col, error) {
-            StackTrace.fromError(error).then(function (stackframes) {
+            StackTrace.fromError(error, {}).then(function (stackframes) {
                 let stringifiedStack = stackframes.map(function (frame) {
                     return frame.toString();
                 }).join('\n');
@@ -50,13 +47,9 @@
         };
     </script>
 
-    <!--
-    <script type="module" src="{{ url_for('static', filename='modules/home/home.js') }}"></script>
-    -->
-
     <script type="module" src="{{ url_for('static', filename='modules/home/currency-selector.js') }}"></script>
     <script type="module" src="{{ url_for('static', filename='modules/home/exchange-rates-viewer.js') }}"></script>
-    <script type="module" src="{{ url_for('static', filename='modules/home/dummy.js') }}"></script>
+    <script type="module" src="{{ url_for('static', filename='modules/shared/dummy.js') }}"></script>
 
 </body>
 </html>

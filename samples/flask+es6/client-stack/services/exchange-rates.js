@@ -3,11 +3,11 @@ export default class ExchangeRatesServices {
         this.baseEndpoint = 'http://api.frankfurter.app';
     }
 
-    getLatest = function (from) {
+    getLatest(from) {
         let self = this;
         return $.get({
             url: `${self.baseEndpoint}/latest?from=${from}`,
             cache: false
         });
-    };
+    }
 }

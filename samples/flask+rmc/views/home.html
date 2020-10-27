@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Rocket based applications</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/shared.css') }}"/>
+</head>
+<body>
+
+    <div data-controller-name="CurrencySelector">
+        <p>Select a Currency</p>
+        <select data-outlet-id="currenciesDropDown"></select>
+    </div>
+
+    <div data-controller-name="ExchangeRatesViewer">
+        <p>
+            Rates for 1 (<span data-outlet-id="selectedCurrencyLabel"></span>)
+        </p>
+        <div data-outlet-id="ratesList"
+             data-child-templates='["client-stack/modules/home/rates.list-row-template.html"]'></div>
+    </div>
+
+    <div data-controller-name="QuickNotifier"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js" integrity="sha512-U6K1YLIFUWcvuw5ucmMtT9HH4t0uz3M366qrF5y4vnyH6dgDzndlcGvH/Lz5k8NFh80SN95aJ5rqGZEdaQZ7ZQ==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stacktrace.js/2.0.2/stacktrace.min.js" integrity="sha512-9fotp9F7mNA1AztobpB07lScgCKiN4i2JuRYTl8MxiHQVJs05EJqeUfPWt9OFAKD1QsIVZiNFQSdov9luOT8TA==" crossorigin="anonymous"></script>
+
+    <script src="{{ url_for('static', filename='libs/plugster/plugster.js') }}"></script>
+    <script src="{{ url_for('static', filename='core/extensions.js') }}"></script>
+    <script src="{{ url_for('static', filename='core/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='services/currencies.js') }}"></script>
+    <script src="{{ url_for('static', filename='services/exchange-rates.js') }}"></script>
+    <script src="{{ url_for('static', filename='modules/shared/quick-notifier.js') }}"></script>
+    <script src="{{ url_for('static', filename='modules/home/currency-selector.js') }}"></script>
+    <script src="{{ url_for('static', filename='modules/home/exchange-rates-viewer.js') }}"></script>
+
+</body>
+</html>

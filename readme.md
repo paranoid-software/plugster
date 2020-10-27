@@ -326,4 +326,4 @@ The sample try to demonstrate the communication betwwen 3 plugsters using a Curr
 
 ### Real world sample
 
-We have a static blog hosted at github.io, it was created using Plugster and it is a more complete demo of the library; it is located at [https://paranoid-sofwtare.github.io](https://paranoid-sofwtare.github.io), and the code its available at the github repository located at [https://github.com/paranoid-software/paranoid-software.github.io](https://github.com/paranoid-software/paranoid-software.github.io)
+We have a static blog hosted at github.io, it was created using Plugster and it is a more complete demo of the library; it is located at [https://paranoid-software.github.io](https://paranoid-software.github.io), and the code its available at the github repository located at [https://github.com/paranoid-software/paranoid-software.github.io](https://github.com/paranoid-software/paranoid-software.github.io)

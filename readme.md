@@ -248,7 +248,7 @@ MyPlugster.valueChanged({}, function (e) {
 });
 ```
 
-#### HTML events subscription
+#### HTML based events subscription
 
 This is definitely the most clean and powerfull way of using events to communicate between Plugsters. Lets say we have plugster A, B and C, and we to communicate some value change on A to B and C; we can do that following the next steps:
 

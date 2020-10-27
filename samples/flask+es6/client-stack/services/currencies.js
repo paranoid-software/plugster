@@ -3,7 +3,7 @@ export default class CurrenciesServices {
         this.baseEndpoint = 'http://api.frankfurter.app';
     }
 
-    getAll = function () {
+    getAll() {
         let self = this;
         return $.get({
             url: `${self.baseEndpoint}/currencies`,

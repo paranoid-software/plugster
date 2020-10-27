@@ -237,7 +237,7 @@ Plugster exposes various mechanisms to enable this type of communication, one of
 ...
 ```
 
-Finally in order to respond to the registered event the simplest way is to invoke the Plugster event method as follows:
+Finally in order to respond to the registered event the simplest way is to invoke the Plugster event registration method passing a callback as follows:
 
 ```javascript
 import MyPlugster from './my-plugster.js';
@@ -248,22 +248,72 @@ MyPlugster.valueChanged({}, function (e) {
 });
 ```
 
+#### HTML based events subscription
+
+This is definitely the most clean and powerfull way of using events to communicate between Plugsters. Lets say we have plugsters A, B and C, and we need to communicate some value change on plugster A into B and C; we can do it easily, following the next steps:
+
+- Expose an event registration method on the *source* Plugster A.
+
+```javascript
+...
+
+    valueChanged(data, callback) {
+        this.registerEventSignature(this.valueChanged.name, data, callback);
+    }
+
+}
+```
+
+- Declare a listener method on the **target** Plugsters B and C.
+
+```javascript
+...
+
+    handleValueChange(data) {
+        console.log(data);
+        // Do something else with the recived data
+    }
+
+}
+```
+
+- Declare the listener at view level on the HTML markup of every interested plugster (in this case plugsters B and C), using the attribute ```data-on-sourceplugstername-sourceeventname=targetListenerMethod```.
+
+```html
+<div data-controller-name="PlugsterB"
+    data-on-plugstera-valuechanged="handleValueChange">
+    <div data-outlet-id="someOutlet"></div>
+</div>
+
+<div data-controller-name="PlugsterC"
+    data-on-plugstera-valuechanged="handleValueChange">
+    <div data-outlet-id="someOutlet"></div>
+</div>
+```
+
+- Thats it !!, every time Plugster A dispatch an event using ```this.dispatchEvent(this.valueChanged.name, {someProperty: someValue})``` both target plugsters will recevice the data dispatched on its listeners.
+
 ## Repository Content
 
-In this repository we have 2 versions for the wrapper; the main version is written usin ES6 standard and it is located at the "es6" folder. But we also publish a version based on the "Revealing Module Pattern" in case we need to work in a legacy project based on that pattern.
+In this repository we have 2 versions for the wrapper; the main version is written using ES6 standard and it is located at the "es6" folder. But we also publish a version based on the "Revealing Module Pattern" in case we need to work in a legacy project based on that pattern.
 
 ```lang-none
 plugster
 └───es6
-│   └───sample
+│   └───dist
 │   └───src
-└───revealing-module-pattern
-│   └───sample
+└───revealing-module-pattern (rmp)
+│   └───dist
 │   └───src
+└───samples
+│   └───flask+es6
+│   └───flask+rmp
 │   LICENSE.md
 │   readme.md
 ```
 
-## Distribution File
+> Be aware that the "rmp" version does not support HTML based event subscriptions yet, and in general it is an old implementation that needs to be reviewed.
 
-[https://cdn.jsdelivr.net/gh/paranoid-software/plugster@1.0.3/es6/dist/plugster.min.js]
+## CDN thanks to jsdelivr
+
+[https://cdn.jsdelivr.net/gh/paranoid-software/plugster@1.0.5/es6/dist/plugster.min.js]

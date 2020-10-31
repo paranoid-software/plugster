@@ -6,16 +6,16 @@ export default class Plugster {
 
         console.log(`${this.name} Controller Instantiated.`);
 
-        this._ = outlets;
-        this.childTemplates = {};
-        this.init();
-
         if (!Plugster.registry) Plugster.registry = {};
         Plugster.registry[this.name.toLowerCase()] = this;
 
         if (!Plugster.explicitSubscriptions) Plugster.explicitSubscriptions = {};
         if (!Plugster.htmlDeclaredSubscriptions) Plugster.htmlDeclaredSubscriptions = {};
 
+        this._ = outlets;
+        this.childTemplates = {};
+        this.init();
+        
     };
 
     toString() {

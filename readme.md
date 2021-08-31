@@ -309,7 +309,7 @@ plugster
 
 ## CDN thanks to jsdelivr
 
-[https://cdn.jsdelivr.net/gh/paranoid-software/plugster@1.0.8/dist/plugster.min.js](https://cdn.jsdelivr.net/gh/paranoid-software/plugster@1.0.8/dist/plugster.min.js)
+[https://cdn.jsdelivr.net/gh/paranoid-software/plugster@1.0.9/dist/plugster.min.js](https://cdn.jsdelivr.net/gh/paranoid-software/plugster@1.0.9/dist/plugster.min.js)
 
 ## Samples
 

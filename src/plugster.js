@@ -54,6 +54,7 @@ export default class Plugster {
             });
             window.plugsters = Plugster.registry;
         }
+
     }
 
     setDictionary(value) {

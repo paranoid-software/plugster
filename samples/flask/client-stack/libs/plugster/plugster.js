@@ -56,7 +56,6 @@ export default class Plugster {
         }
 
     }
-        Plugster.registry[this.name.toLowerCase()] = this;
 
     setDictionary(value) {
         this.dictionary = value;

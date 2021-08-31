@@ -45,7 +45,7 @@ The wrapper recognize a view by the existence of a **data-controller-id** attrib
              data-child-templates='["list-row-template.html"]'></div>
     </div>
 
-    <!-- Thanks to ECMAScript 6 we can use modules, wich can contain 
+    <!-- Thanks to ECMAScript 6 we can use modules, wich can contain
         all the controllers needed by the page. -->
     <script type="module" src="my-module.js"></script>
 
@@ -299,20 +299,13 @@ In this repository we have 2 versions for the wrapper; the main version is writt
 
 ```lang-none
 plugster
-└───es6
-│   └───dist
-│   └───src
-└───revealing-module-pattern (rmp)
-│   └───dist
-│   └───src
+└───dist
+└───src
 └───samples
-│   └───flask+es6
-│   └───flask+rmp
+│   └───flask
 │   LICENSE.md
 │   readme.md
 ```
-
-> Be aware that the "rmp" version does not support HTML based event subscriptions yet, and in general it is an old implementation that needs to be reviewed.
 
 ## CDN thanks to jsdelivr
 
@@ -320,7 +313,7 @@ plugster
 
 ## Samples
 
-This repository includes two small samples using Flask (python). The first one uses the es6 version, while the second one uses the "rmp" implementation.
+This repository includes one small samples using Flask (python).
 
 The sample try to demonstrate the communication betwwen 3 plugsters using a Currency Rate Public API.
 

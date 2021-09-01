@@ -1,4 +1,4 @@
-export default class Plugster {
+class Plugster {
 
     constructor(outlets, controllerName) {
 
@@ -226,11 +226,6 @@ export default class Plugster {
 
     // Explicit subscriptions enrollment, you will need a default listener on the subscriber called onNewMessage
     listenTo(pubPlugster, event) {
-/*        if (!event) {
-            console.log(1,`${pubPlugster.name}_${this.name}`)
-            Plugster.explicitSubscriptions[`${pubPlugster.name}_${this.name}`.toLowerCase()] = this;
-            return;
-        }*/
         Plugster.explicitSubscriptions[`${pubPlugster.name}_${event.name}_${this.name}`.toLowerCase()] = this;
     }
 
@@ -241,3 +236,5 @@ export default class Plugster {
     }
 
 }
+
+export {Plugster}

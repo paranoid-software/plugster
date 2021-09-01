@@ -1,5 +1,5 @@
-import Plugster from '../../libs/plugster/plugster.js';
-import ExchangeRatesServices from '../../services/exchange-rates.js';
+import {Plugster} from '/client-stack/deps/plugster/plugster.module.js';
+import ExchangeRatesServices from '/client-stack/services/exchange-rates.js';
 
 class ExchangeRatesViewer extends Plugster {
 

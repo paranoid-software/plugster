@@ -1,5 +1,5 @@
-import Plugster from '../../libs/plugster/plugster.js';
-import CurrenciesServices from '../../services/currencies.js';
+import {Plugster} from '/client-stack/deps/plugster/plugster.module.js';
+import CurrenciesServices from '/client-stack/services/currencies.js';
 
 class CurrencySelector extends Plugster {
 

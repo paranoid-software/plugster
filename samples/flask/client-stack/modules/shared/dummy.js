@@ -1,4 +1,4 @@
-import Plugster from '../../libs/plugster/plugster.js';
+import {Plugster} from '/client-stack/deps/plugster/plugster.module.js';
 
 class Dummy extends Plugster {
 

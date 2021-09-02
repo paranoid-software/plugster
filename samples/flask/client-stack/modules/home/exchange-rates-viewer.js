@@ -1,5 +1,4 @@
 import {Plugster} from 'https://cdn.jsdelivr.net/gh/paranoid-software/plugster@1.0.11/dist/plugster.min.js?module';
-
 import ExchangeRatesServices from '/client-stack/services/exchange-rates.js';
 
 class ExchangeRatesViewer extends Plugster {

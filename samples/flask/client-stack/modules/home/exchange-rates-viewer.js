@@ -1,4 +1,5 @@
-import {Plugster} from '../../deps/plugster/plugster.js';
+import {Plugster} from 'https://cdn.jsdelivr.net/gh/paranoid-software/plugster@1.0.11/dist/plugster.min.js?module';
+
 import ExchangeRatesServices from '/client-stack/services/exchange-rates.js';
 
 class ExchangeRatesViewer extends Plugster {
@@ -13,23 +14,19 @@ class ExchangeRatesViewer extends Plugster {
 
         let self = this;
 
-        self._.selectedCurrencyLabel.click(function () {
+        self._.currencyLabel.click(function () {
             console.log(this.innerText);
         });
 
     }
 
-    onNewMessage(plugsterSourceName, eventName, data) {
-        console.log([plugsterSourceName, eventName, data]);
-    }
-
     handleCurrencyChange(data) {
-        this.invalidateRatesList(data.value);
+        this.invalidateRatesList(data.currentValue);
     }
 
     invalidateRatesList(forCurrency) {
         let self = this;
-        self._.selectedCurrencyLabel.text(forCurrency);
+        self._.currencyLabel.text(forCurrency);
         self.exchangeRatesSvcs.getLatest(forCurrency).then(function (response) {
             self._.ratesList.clear();
             Object.keys(response['rates']).map(function (key) {
@@ -40,7 +37,7 @@ class ExchangeRatesViewer extends Plugster {
                     currencyCodeLabel: {},
                     valueLabel: {}
                 }, function (key, jsonData) {
-                    console.log([key, jsonData]);
+                    self.notifyItemClick({key: key, value: jsonData});
                 });
                 if(!itemOutlets) return null;
                 itemOutlets.currencyCodeLabel.text(key);
@@ -49,9 +46,21 @@ class ExchangeRatesViewer extends Plugster {
         });
     }
 
+    notifyItemClick(value) {
+        this.dispatchEvent(this.itemClicked.name, value);
+    }
+
+    itemClicked(data, callback) {
+        this.registerEventSignature(this.itemClicked.name, data, callback);
+    }
+
 }
 
-Plugster.plug(new ExchangeRatesViewer({
-    selectedCurrencyLabel: {},
+let exchangeRatesViewer = new ExchangeRatesViewer({
+    currencyLabel: {},
     ratesList: {}
-}));
+});
+
+Plugster.plug(exchangeRatesViewer);
+
+export {exchangeRatesViewer as ExchangeRatesViewer};

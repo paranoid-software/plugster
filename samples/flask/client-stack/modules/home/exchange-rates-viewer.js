@@ -1,4 +1,5 @@
-import {Plugster} from '../../deps/plugster/plugster.js';
+import {Plugster} from 'https://cdn.jsdelivr.net/gh/paranoid-software/plugster@1.0.11/dist/plugster.min.js?module';
+
 import ExchangeRatesServices from '/client-stack/services/exchange-rates.js';
 
 class ExchangeRatesViewer extends Plugster {
@@ -13,7 +14,7 @@ class ExchangeRatesViewer extends Plugster {
 
         let self = this;
 
-        self._.selectedCurrencyLabel.click(function () {
+        self._.currencyLabel.click(function () {
             console.log(this.innerText);
         });
 
@@ -24,12 +25,13 @@ class ExchangeRatesViewer extends Plugster {
     }
 
     handleCurrencyChange(data) {
-        this.invalidateRatesList(data.value);
+        console.log(data)
+        this.invalidateRatesList(data.currentValue);
     }
 
     invalidateRatesList(forCurrency) {
         let self = this;
-        self._.selectedCurrencyLabel.text(forCurrency);
+        self._.currencyLabel.text(forCurrency);
         self.exchangeRatesSvcs.getLatest(forCurrency).then(function (response) {
             self._.ratesList.clear();
             Object.keys(response['rates']).map(function (key) {
@@ -51,7 +53,11 @@ class ExchangeRatesViewer extends Plugster {
 
 }
 
-Plugster.plug(new ExchangeRatesViewer({
-    selectedCurrencyLabel: {},
+let exchangeRatesViewer = new ExchangeRatesViewer({
+    currencyLabel: {},
     ratesList: {}
-}));
+});
+
+Plugster.plug(exchangeRatesViewer);
+
+export {exchangeRatesViewer as ExchangeRatesViewer};

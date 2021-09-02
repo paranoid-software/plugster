@@ -15,17 +15,17 @@
     <div data-controller-name="ExchangeRatesViewer"
          data-on-currencyselector-currencychanged="handleCurrencyChange">
         <p>
-            Rates for 1 (<span data-outlet-id="selectedCurrencyLabel"></span>)
+            Rates for 1 (<span data-outlet-id="currencyLabel"></span>)
         </p>
         <div data-outlet-id="ratesList"
              data-child-templates='["client-stack/modules/home/rates.list-row-template.html"]'></div>
     </div>
 
-    <p>Testing multiple subscribers to the same publisher</p>
-
-    <div data-controller-name="Dummy"
+    <div data-controller-name="NotificationsViewer"
          data-on-currencyselector-currencychanged="handleCurrencyChange">
-        <span data-outlet-id="outlet"></span>
+        <p>
+            <span data-outlet-id="messageText"></span>
+        </p>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js" integrity="sha512-U6K1YLIFUWcvuw5ucmMtT9HH4t0uz3M366qrF5y4vnyH6dgDzndlcGvH/Lz5k8NFh80SN95aJ5rqGZEdaQZ7ZQ==" crossorigin="anonymous"></script>
@@ -47,10 +47,8 @@
         };
     </script>
 
-    <script type="module" src="{{ url_for('static', filename='deps/plugster/plugster.js') }}"></script>
     <script type="module" src="{{ url_for('static', filename='modules/home/currency-selector.js') }}"></script>
     <script type="module" src="{{ url_for('static', filename='modules/home/exchange-rates-viewer.js') }}"></script>
-    <script type="module" src="{{ url_for('static', filename='modules/shared/dummy.js') }}"></script>
-
+    <script type="module" src="{{ url_for('static', filename='modules/shared/notifications-viewer.js') }}"></script>
 </body>
 </html>

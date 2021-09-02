@@ -1,4 +1,4 @@
-import {Plugster} from '/client-stack/deps/plugster/plugster.module.js';
+import {Plugster} from '/client-stack/deps/plugster/plugster.js';
 import CurrenciesServices from '/client-stack/services/currencies.js';
 
 class CurrencySelector extends Plugster {
@@ -31,11 +31,14 @@ class CurrencySelector extends Plugster {
     }
 
     currencyChanged(data, callback) {
+        console.log(1);
         this.registerEventSignature(this.currencyChanged.name, data, callback);
     }
 
 }
 
-export default new CurrencySelector({
+let currencySelector = new CurrencySelector({
     currenciesDropDown: {}
 });
+
+Plugster.plug(currencySelector);

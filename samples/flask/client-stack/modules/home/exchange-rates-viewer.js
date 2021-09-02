@@ -1,4 +1,4 @@
-import {Plugster} from '/client-stack/deps/plugster/plugster.module.js';
+import {Plugster} from '../../deps/plugster/plugster.js';
 import ExchangeRatesServices from '/client-stack/services/exchange-rates.js';
 
 class ExchangeRatesViewer extends Plugster {
@@ -51,7 +51,7 @@ class ExchangeRatesViewer extends Plugster {
 
 }
 
-export default new ExchangeRatesViewer({
+Plugster.plug(new ExchangeRatesViewer({
     selectedCurrencyLabel: {},
     ratesList: {}
-});
+}));

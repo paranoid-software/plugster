@@ -1,4 +1,4 @@
-import {Plugster} from '/client-stack/deps/plugster/plugster.module.js';
+import {Plugster} from '../../deps/plugster/plugster.js';
 
 class Dummy extends Plugster {
 
@@ -15,6 +15,6 @@ class Dummy extends Plugster {
     }
 }
 
-export default new Dummy({
+Plugster.plug(new Dummy({
     outlet: {}
-});
+}));

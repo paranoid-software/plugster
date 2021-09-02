@@ -20,12 +20,7 @@ class ExchangeRatesViewer extends Plugster {
 
     }
 
-    onNewMessage(plugsterSourceName, eventName, data) {
-        console.log([plugsterSourceName, eventName, data]);
-    }
-
     handleCurrencyChange(data) {
-        console.log(data)
         this.invalidateRatesList(data.currentValue);
     }
 
@@ -42,13 +37,21 @@ class ExchangeRatesViewer extends Plugster {
                     currencyCodeLabel: {},
                     valueLabel: {}
                 }, function (key, jsonData) {
-                    console.log([key, jsonData]);
+                    self.notifyItemClick({key: key, value: jsonData});
                 });
                 if(!itemOutlets) return null;
                 itemOutlets.currencyCodeLabel.text(key);
                 itemOutlets.valueLabel.text(rate);
             });
         });
+    }
+
+    notifyItemClick(value) {
+        this.dispatchEvent(this.itemClicked.name, value);
+    }
+
+    itemClicked(data, callback) {
+        this.registerEventSignature(this.itemClicked.name, data, callback);
     }
 
 }

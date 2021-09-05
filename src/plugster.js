@@ -1,3 +1,5 @@
+import $ from './jquery.module.js';
+
 class Plugster extends Object {
 
     constructor(outlets, controllerName) {
@@ -17,7 +19,6 @@ class Plugster extends Object {
 
         this.locales = {};
         this.name = controllerName || this.constructor.name;
-
         this._ = outlets;
         this.childTemplates = {};
 
@@ -261,6 +262,9 @@ class Plugster extends Object {
     }
 
     static createView(controllerName, htmlTemplateFile, callback) {
+        //let html = '<div data-controller-name="[CONTROLLER_NAME]"></div>';
+        //callback(html.replace('[CONTROLLER_NAME]', controllerName));
+        //return
         $.get({url: htmlTemplateFile, cache: false}, function(html) {
             callback(html.replace('[CONTROLLER_NAME]', controllerName));
         });

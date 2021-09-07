@@ -271,4 +271,4 @@ class Plugster extends Object {
 
 }
 
-export {Plugster}
+export { Plugster };

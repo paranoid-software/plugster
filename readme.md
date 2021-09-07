@@ -57,7 +57,7 @@ In the event of having nested views, the inner boundaries define the field of ac
 
 ### The outlets (._.)
 
-We define an outlet as an HTML element which form part of a plugster by beign inside of it. They have a **data-outlet-id** attribute which holds its corresponding unique ID at the plugster context.
+We define an outlet as an HTML element which form part of a plugster by beign inside it. They have a **data-outlet-id** attribute which holds its corresponding unique ID at the plugster context.
 
 Every outlet defined in a view can be referenced and accessed by its corresponding controller as a jQuery component without using the $ selector directly, which helps to mantain the code with a little less effort.
 
@@ -99,7 +99,7 @@ A template is an HTML independent file in which we can design a complex item usi
 ### Using the child outlets whitin the controller
 
 ```javascript
-...
+class MyPlugster extends Plugster {
 
     invalidateRatesList(forCurrency) {
         let self = this;
@@ -117,8 +117,8 @@ A template is an HTML independent file in which we can design a complex item usi
                     currencyCodeLabel: {},
                     valueLabel: {}
                 });
-                if(!itemOutlets) return null;
-                itemOutlets.root.click(function() {
+                if (!itemOutlets) return null;
+                itemOutlets.root.click(function () {
                     let key = this.dataset['key'];
                     console.log([key, self._.ratesList.getData(key)]);
                 });
@@ -128,13 +128,13 @@ A template is an HTML independent file in which we can design a complex item usi
         });
     }
 
-...
+}
 ```
 
 ## Plugster Boilerplate
 
 ```javascript
-import Plugster from '../../libs/plugster/plugster.js';
+import {Plugster} from '../../libs/plugster/plugster.js';
 
 class WorkingPlugster extends Plugster {
 
@@ -148,7 +148,7 @@ class WorkingPlugster extends Plugster {
         // and using the declared outlets.
 
         let self = this;
-        self._.someOutlet....
+        self._.someOutlet // ....
     }
 
     someEvent(data, callback) {
@@ -157,18 +157,19 @@ class WorkingPlugster extends Plugster {
 
 }
 
-// Here we export an instance instead of the classs, because we
-// do not need to instantiate this plugster, the idea is more like
-// having a controller for a specific HTML view or widget.
-export default new WorkingPlugster({
+let workingPlugster = await new WorkingPlugster({
     someOutlet: {}
-});
+}).init();
+
+Plugster.plug(workingPlugster);
+
+export {workingPlugster as WorkingPlugster};
 ```
 
 ## Plugster Sample
 
 ```javascript
-import Plugster from '../../libs/plugster/plugster.js';
+import {Plugster} from '../../libs/plugster/plugster.js';
 
 class MyFirstPlugster extends Plugster {
 
@@ -202,9 +203,13 @@ class MyFirstPlugster extends Plugster {
 
 }
 
-export default new MyFirstPlugster({
+let myFirstPlugster = await new MyFirstPlugster({
     someDropDownOutlet: {}
-});
+}).init();
+
+Plugster.plug(myFirstPlugster);
+
+export {myFirstPlugster as MyFirstPlugster};
 ```
 
 ### Events declarations and dispatching
@@ -216,7 +221,7 @@ Plugster exposes various mechanisms to enable this type of communication, one of
 - **registerEventSignature**, using this method we can add a signature for a defined event, for example:
 
 ```javascript
-...
+class MyPlugster extends Plugster {
 
     valueChanged(data, callback) {
         this.registerEventSignature(this.valueChanged.name, data, callback);
@@ -228,19 +233,19 @@ Plugster exposes various mechanisms to enable this type of communication, one of
 - **dispatchEvent**, using this method we can trigger an event from within a Plugster, for example:
 
 ```javascript
-...
+class MyPlugster extends Plugster {
 
     notifyValueSelection(value) {
         this.dispatchEvent(this.valueChanged.name, {value: value})
     }
 
-...
+}
 ```
 
-Finally in order to respond to the registered event the simplest way is to invoke the Plugster event registration method passing a callback as follows:
+Finally, in order to respond to the registered event the simplest way is to invoke the Plugster event registration method passing a callback as follows:
 
 ```javascript
-import MyPlugster from './my-plugster.js';
+import {MyPlugster} from './my-plugster.js';
 
 MyPlugster.valueChanged({}, function (e) {
     console.log(e.args.value);
@@ -255,7 +260,7 @@ This is definitely the most clean and powerfull way of using events to communica
 - Expose an event registration method on the *source* Plugster A.
 
 ```javascript
-...
+class MyPlugsterA extends Plugster {
 
     valueChanged(data, callback) {
         this.registerEventSignature(this.valueChanged.name, data, callback);
@@ -267,7 +272,16 @@ This is definitely the most clean and powerfull way of using events to communica
 - Declare a listener method on the **target** Plugsters B and C.
 
 ```javascript
-...
+class MyPlugsterB extends Plugster {
+
+    handleValueChange(data) {
+        console.log(data);
+        // Do something else with the recived data
+    }
+
+}
+
+class MyPlugsterC extends Plugster {
 
     handleValueChange(data) {
         console.log(data);
@@ -291,7 +305,7 @@ This is definitely the most clean and powerfull way of using events to communica
 </div>
 ```
 
-- Thats it !!, every time Plugster A dispatch an event using ```this.dispatchEvent(this.valueChanged.name, {someProperty: someValue})``` both target plugsters will recevice the data dispatched on its listeners.
+- That's it !!, every time Plugster A dispatch an event using ```this.dispatchEvent(this.valueChanged.name, {someProperty: someValue})``` both target plugsters will recevice the data dispatched on its listeners.
 
 ## Repository Content
 
@@ -301,15 +315,29 @@ In this repository we have 2 versions for the wrapper; the main version is writt
 plugster
 └───dist
 └───src
-└───samples
-│   └───flask
-│   LICENSE.md
+└───tests
+│   .babelrc
+│   .gitignore
+│   LICENSE
+│   package-lock.json
+│   package.json
 │   readme.md
+│   rollup.config.js
 ```
 
 ## CDN thanks to jsdelivr
 
-[https://cdn.jsdelivr.net/gh/paranoid-software/plugster@1.0.11/dist/plugster.min.js](https://cdn.jsdelivr.net/gh/paranoid-software/plugster@1.0.11/dist/plugster.min.js)
+[https://cdn.jsdelivr.net/gh/paranoid-software/plugster@1.0.12/dist/plugster.min.js](https://cdn.jsdelivr.net/gh/paranoid-software/plugster@1.0.12/dist/plugster.min.js)
+
+## Library Dependencies and Development Dependencies
+
+The library depends only on jQuery, at the moment we are using jQuery 3.6.0, but we believe it will work with older versions also.
+
+For the development we depend on:
+
+- jest, for testing environment.
+- babel, for ES6 module testing.
+- rollup $ terser, for ES6 module distribution file generation. 
 
 ## Samples
 
@@ -317,6 +345,8 @@ This repository includes one small samples using Flask (python).
 
 The sample try to demonstrate the communication betwwen 3 plugsters using a Currency Rate Public API.
 
+The samples are located at the repo: TBD
+
 ### Real world sample
 
-We have a static blog hosted at github.io, it was created using Plugster and it is a more complete demo of the library; it is located at [https://paranoid-software.github.io](https://paranoid-software.github.io), and the code its available at the github repository located at [https://github.com/paranoid-software/paranoid-software.github.io](https://github.com/paranoid-software/paranoid-software.github.io)
+We have a static blog hosted at GitHub.io, it was created using Plugster, and it is a more complete demo of the library; it is located at [https://paranoid-software.github.io](https://paranoid-software.github.io), and the code it's available at the GitHub repository located at [https://github.com/paranoid-software/paranoid-software.github.io](https://github.com/paranoid-software/paranoid-software.github.io)

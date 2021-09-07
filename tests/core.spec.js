@@ -2,8 +2,10 @@
  * @jest-environment jsdom
  **/
 
+import $ from 'jquery';
+window.$ = $;
+
 import {Plugster} from '../src/plugster.js';
-import $ from '../src/jquery.module.js';
 import 'regenerator-runtime/runtime';
 
 describe('When a new explicit plugster is instantiated', () => {
@@ -12,6 +14,7 @@ describe('When a new explicit plugster is instantiated', () => {
         constructor(outlets, controllerName) {
             super(outlets, controllerName);
         }
+
         afterInit() {
         }
     }
@@ -42,6 +45,7 @@ describe('When a new implicit plugster is instantiated', () => {
         constructor(props) {
             super(props);
         }
+
         afterInit() {
         }
     }
@@ -99,6 +103,7 @@ describe('When a plugster gets plugged', () => {
         constructor(outlets) {
             super(outlets);
         }
+
         afterInit() {
         }
     }
@@ -126,6 +131,7 @@ describe("When a view has the same outlet on nested controllers", () => {
         constructor(props) {
             super(props);
         }
+
         afterInit() {
         }
     }
@@ -134,6 +140,7 @@ describe("When a view has the same outlet on nested controllers", () => {
         constructor(outlets) {
             super(outlets);
         }
+
         afterInit() {
         }
     }

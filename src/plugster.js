@@ -242,9 +242,8 @@ class Plugster extends Object {
         let keyPrefix = `${this.name}_${name}`.toLowerCase();
         Object.keys(Plugster.explicitSubscriptions).map(function(key) {
             if(key.startsWith(keyPrefix)) {
-                if (Plugster.explicitSubscriptions[key]['onNewMessage']) {
-                    Plugster.explicitSubscriptions[key]['onNewMessage'](self.name, name, args);
-                }
+                if (!Plugster.explicitSubscriptions[key]['onNewMessage']) throw new Error('Subscriber must implement onNewMessage method.');
+                Plugster.explicitSubscriptions[key]['onNewMessage'](self.name, name, args);
             }
         });
     }

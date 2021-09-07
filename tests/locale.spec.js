@@ -3,7 +3,6 @@
  **/
 
 import {Plugster} from '../src/plugster.js';
-import $ from '../src/jquery.module.js';
 
 describe('When using multilanguage', () => {
 

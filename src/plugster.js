@@ -1,29 +1,26 @@
+import $ from './jquery.module.js';
+
 class Plugster extends Object {
 
     constructor(outlets, controllerName) {
         super();
 
         if (!Plugster.document) Plugster.document = $(document);
-
         if (!Plugster.registry) {
             Plugster.registry = {};
             $('[data-controller-name]').map(function(index, val) {
-               Plugster.registry[$(val).data('controllerName').toLowerCase()] = undefined;
+                Plugster.registry[$(val).data('controllerName').toLowerCase()] = undefined;
             });
         }
-
         if (!Plugster.explicitSubscriptions) Plugster.explicitSubscriptions = {};
         if (!Plugster.htmlDeclaredSubscriptions) Plugster.htmlDeclaredSubscriptions = {};
 
         this.locales = {};
         this.name = controllerName || this.constructor.name;
-
         this._ = outlets;
         this.childTemplates = {};
 
         console.log(`${this.name} Controller Instantiated.`);
-
-        this.init();
     }
 
     static plug(me) {
@@ -36,7 +33,7 @@ class Plugster extends Object {
         });
 
         if (!allPlugstersRegistered) return;
-        if (window.plugsters) return;
+        if (window['plugsters']) return;
 
         // Binding HTML declared subscriptions
         Object.keys(Plugster.registry).map(function (plugsterKey) {
@@ -59,7 +56,8 @@ class Plugster extends Object {
                 Plugster.htmlDeclaredSubscriptions[`${plugsterNameLowerCased}_${eventNameLowerCased}_${plugster.name.toLowerCase()}`] = {listener: plugster, methodName: methodName};
             });
         });
-        window.plugsters = Plugster.registry;
+
+        window['plugsters'] = Plugster.registry;
 
     }
 
@@ -82,18 +80,23 @@ class Plugster extends Object {
 
         console.log(`Initializing ${self.name} Controller.`);
 
-        self.bindOutlets(function () {
-            console.log(`${self.name} Controller Initialized`);
-            // Here we are invoking the extended class "afterInit" method
-            self.afterInit();
+        let childTemplatesLoadPromises = self.bindOutlets();
+        return new window.Promise((resolve, reject) => {
+            return window.Promise.all(childTemplatesLoadPromises).then(function () {
+                console.log(`${self.name} Controller Initialized`);
+                self.afterInit();
+                resolve(self);
+            }).catch(e => {
+                reject(e);
+            });
         });
     }
 
     afterInit() {
-        throw new Error('You have to implement the Plugster afterInit method !!!');
+        throw new Error('Every Plugster must implement its own afterInit method !!!');
     }
 
-    bindOutlets(afterBind) {
+    bindOutlets() {
 
         let self = this;
 
@@ -113,7 +116,8 @@ class Plugster extends Object {
             let filteredOutlet = root.find(selector);
             if (filteredOutlet.length > 1) {
                 let filteredOutlets = $.map(filteredOutlet, function (o) {
-                    if ($(o).closest('[data-controller-name]').data('controller-name') === self.name) return $(o);
+                    if ($(o).closest('[data-controller-name]').data('controller-name') === self.name) 
+                        return $(o);
                     return null;
                 });
                 filteredOutlet = filteredOutlets[0];
@@ -171,15 +175,13 @@ class Plugster extends Object {
 
         console.log(`Outlets for ${self.name} Controller were binded successfuly !!!`);
 
-        window.Promise.all(childTemplatesLoadPromises).then(function () {
-            afterBind();
-        });
+        return childTemplatesLoadPromises;
 
     }
 
     loadChildTemplate(outletName, index, file, deferred) {
         let self = this;
-        $.get({url: file, cache: false}, function (html) {
+        $.get({url: file, cache: false}, function (html) {         
             self.childTemplates[`${outletName}_${index}`] = html;
             console.log(`Template ${file} loaded.`);
             deferred.resolve();
@@ -223,7 +225,6 @@ class Plugster extends Object {
             return cache.get(entity);
         }
         const c = new entity.constructor;
-
         if (entity instanceof Map || entity instanceof WeakMap) {
             entity.forEach((value, key) => c.set(self.cloneDeep(key), self.cloneDeep(value)));
         }
@@ -239,7 +240,8 @@ class Plugster extends Object {
         let keyPrefix = `${this.name}_${name}`.toLowerCase();
         Object.keys(Plugster.explicitSubscriptions).map(function(key) {
             if(key.startsWith(keyPrefix)) {
-                Plugster.explicitSubscriptions[key]?.onNewMessage(self.name, name, args);
+                if (!Plugster.explicitSubscriptions[key]['onNewMessage']) throw new Error('Subscriber must implement onNewMessage method.');
+                Plugster.explicitSubscriptions[key]['onNewMessage'](self.name, name, args);
             }
         });
     }

@@ -3,7 +3,6 @@
  **/
 
 import {Plugster} from '../src/plugster.js';
-import $ from '../src/jquery.module.js';
 import 'regenerator-runtime/runtime';
 
 describe('When html subscription is registered', () => {
@@ -12,6 +11,7 @@ describe('When html subscription is registered', () => {
         constructor(outlets) {
             super(outlets);
         }
+
         afterInit() {
             let self = this;
             self._.hiButton.on('click', {}, () => {
@@ -20,6 +20,7 @@ describe('When html subscription is registered', () => {
                 self.dispatchEvent(self.myEvent.name, {message: 'Hi', nested: {message: 'Stranger'}, myMap: myMap});
             });
         }
+
         myEvent(data, callback) {
             this.registerEventSignature(this.myEvent.name, data, callback);
         }
@@ -29,6 +30,7 @@ describe('When html subscription is registered', () => {
         constructor(outlets) {
             super(outlets);
         }
+
         afterInit() {
         }
     }
@@ -37,8 +39,10 @@ describe('When html subscription is registered', () => {
         constructor(outlets) {
             super(outlets);
         }
+
         afterInit() {
         }
+
         handleMyFirstPlugsterMyevent(data) {
             console.log(data);
         }
@@ -56,7 +60,7 @@ describe('When html subscription is registered', () => {
         let myFirstPlugster = await new MyFirstPlugster({hiButton: {}}).init();
         let incompletePlugster = await new IncompletePlugster({}).init();
 
-        expect(()=> {
+        expect(() => {
             Plugster.plug(myFirstPlugster);
             Plugster.plug(incompletePlugster)
         }).toThrow('There is no method handleMyFirstPlugsterMyevent within the IncompletePlugster controller !!!');
@@ -70,7 +74,7 @@ describe('When html subscription is registered', () => {
         let incompletePlugster = await new IncompletePlugster({hiButton: {}}).init();
         let mySecondPlugster = await new MySecondPlugster({}).init();
 
-        expect(()=>{
+        expect(() => {
             Plugster.plug(incompletePlugster);
             Plugster.plug(mySecondPlugster);
         }).toThrow('There is no myevent event in incompleteplugster controller !!!');

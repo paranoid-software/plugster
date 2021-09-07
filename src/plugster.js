@@ -8,7 +8,7 @@ class Plugster extends Object {
         if (!Plugster.document) Plugster.document = $(document);
         if (!Plugster.registry) {
             Plugster.registry = {};
-            $('[data-controller-name]').map(function(index, val) {
+            $('[data-controller-name]').map(function (index, val) {
                 Plugster.registry[$(val).data('controllerName').toLowerCase()] = undefined;
             });
         }
@@ -28,13 +28,13 @@ class Plugster extends Object {
         Plugster.registry[me.name.toLowerCase()] = me;
 
         let allPlugstersRegistered = true;
-        Object.keys(Plugster.registry).map(function(key) {
-            if(!Plugster.registry[key]) allPlugstersRegistered = false;
+        Object.keys(Plugster.registry).map(function (key) {
+            if (!Plugster.registry[key]) allPlugstersRegistered = false;
         });
 
         if (!allPlugstersRegistered) return;
         if (window['plugsters']) return;
-        console.log(Plugster.registry)
+
         // Binding HTML declared subscriptions
         Object.keys(Plugster.registry).map(function (plugsterKey) {
             let plugster = Plugster.registry[plugsterKey];
@@ -53,7 +53,10 @@ class Plugster extends Object {
                     return methodName.toLowerCase();
                 });
                 if (pubMethodsLowerCased.indexOf(eventNameLowerCased) < 0) throw new Error(`There is no ${eventNameLowerCased} event in ${plugsterNameLowerCased} controller !!!`);
-                Plugster.htmlDeclaredSubscriptions[`${plugsterNameLowerCased}_${eventNameLowerCased}_${plugster.name.toLowerCase()}`] = {listener: plugster, methodName: methodName};
+                Plugster.htmlDeclaredSubscriptions[`${plugsterNameLowerCased}_${eventNameLowerCased}_${plugster.name.toLowerCase()}`] = {
+                    listener: plugster,
+                    methodName: methodName
+                };
             });
         });
 
@@ -66,8 +69,8 @@ class Plugster extends Object {
     }
 
     translateTo(lang, text) {
-        if(!this.locales[lang]) return text;
-        if(!this.locales[lang][text]) return text;
+        if (!this.locales[lang]) return text;
+        if (!this.locales[lang][text]) return text;
         return this.locales[lang][text];
     }
 
@@ -116,7 +119,7 @@ class Plugster extends Object {
             let filteredOutlet = root.find(selector);
             if (filteredOutlet.length > 1) {
                 let filteredOutlets = $.map(filteredOutlet, function (o) {
-                    if ($(o).closest('[data-controller-name]').data('controller-name') === self.name) 
+                    if ($(o).closest('[data-controller-name]').data('controller-name') === self.name)
                         return $(o);
                     return null;
                 });
@@ -133,8 +136,8 @@ class Plugster extends Object {
                     let outlets = self.compileChildTemplate(key, this.children().length - 1, this.children().last(), outletsSchema);
                     if (outlets === null) return null;
                     outlets.root.attr('data-key', itemKey);
-                    if(itemClickCallback)
-                        outlets.root.click(function() {
+                    if (itemClickCallback)
+                        outlets.root.click(function () {
                             itemClickCallback(itemKey, jsonData);
                         });
                     this.items[itemKey].outlets = outlets;
@@ -151,7 +154,7 @@ class Plugster extends Object {
                 filteredOutlet.getOutlets = function (key) {
                     return this.items[key].outlets;
                 };
-                filteredOutlet.delete = function(key) {
+                filteredOutlet.delete = function (key) {
                     this.children(`[data-key='${key}']`).remove();
                     delete this.items[key];
                 };
@@ -181,7 +184,7 @@ class Plugster extends Object {
 
     loadChildTemplate(outletName, index, file, deferred) {
         let self = this;
-        $.get({url: file, cache: false}, function (html) {         
+        $.get({url: file, cache: false}, function (html) {
             self.childTemplates[`${outletName}_${index}`] = html;
             console.log(`Template ${file} loaded.`);
             deferred.resolve();
@@ -212,7 +215,7 @@ class Plugster extends Object {
         let unreferencedArgs = this.cloneDeep(args);
         this.broadcastExplicitSubscriptionsMessages(name, unreferencedArgs);
         this.broadcastHtmlDeclaredSubscriptionsMessages(name, unreferencedArgs);
-        $(this).triggerHandler(new $.Event(name,{args: unreferencedArgs}));
+        $(this).triggerHandler(new $.Event(name, {args: unreferencedArgs}));
     }
 
     // Taken from https://medium.com/weekly-webtips/deep-clone-with-vanilla-js-5ef16e0b365c
@@ -232,14 +235,14 @@ class Plugster extends Object {
             entity.forEach((value) => c.add(self.cloneDeep(value)));
         }
         cache.set(entity, c);
-        return Object.assign(c, ...Object.keys(entity).map((prop) => ({ [prop]: self.cloneDeep(entity[prop], cache) })));
+        return Object.assign(c, ...Object.keys(entity).map((prop) => ({[prop]: self.cloneDeep(entity[prop], cache)})));
     }
 
     broadcastExplicitSubscriptionsMessages(name, args) {
         let self = this;
         let keyPrefix = `${this.name}_${name}`.toLowerCase();
-        Object.keys(Plugster.explicitSubscriptions).map(function(key) {
-            if(key.startsWith(keyPrefix)) {
+        Object.keys(Plugster.explicitSubscriptions).map(function (key) {
+            if (key.startsWith(keyPrefix)) {
                 if (!Plugster.explicitSubscriptions[key]['onNewMessage']) throw new Error('Subscriber must implement onNewMessage method.');
                 Plugster.explicitSubscriptions[key]['onNewMessage'](self.name, name, args);
             }
@@ -248,8 +251,8 @@ class Plugster extends Object {
 
     broadcastHtmlDeclaredSubscriptionsMessages(name, args) {
         let keyPrefix = `${this.name}_${name}`.toLowerCase();
-        Object.keys(Plugster.htmlDeclaredSubscriptions).map(function(key) {
-            if(key.startsWith(keyPrefix)) {
+        Object.keys(Plugster.htmlDeclaredSubscriptions).map(function (key) {
+            if (key.startsWith(keyPrefix)) {
                 let sub = Plugster.htmlDeclaredSubscriptions[key];
                 sub.listener[sub.methodName].call(sub.listener, args);
             }
@@ -263,7 +266,7 @@ class Plugster extends Object {
     }
 
     static createView(controllerName, htmlTemplateFile, callback) {
-        $.get({url: htmlTemplateFile, cache: false}, function(html) {
+        $.get({url: htmlTemplateFile, cache: false}, function (html) {
             callback(html.replace('[CONTROLLER_NAME]', controllerName));
         });
     }

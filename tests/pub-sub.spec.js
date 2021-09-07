@@ -11,12 +11,14 @@ describe('When explicit subscription is registered', () => {
         constructor(outlets) {
             super(outlets);
         }
+
         afterInit() {
             let self = this;
             self._.hiButton.on('click', {}, () => {
                 self.dispatchEvent(self.myEvent.name, {message: 'Hi', nested: {message: 'Stranger'}, list: [1, 2, 3]});
             });
         }
+
         myEvent(data, callback) {
             this.registerEventSignature(this.myEvent.name, data, callback);
         }
@@ -26,8 +28,10 @@ describe('When explicit subscription is registered', () => {
         constructor(outlets) {
             super(outlets);
         }
+
         afterInit() {
         }
+
         onNewMessage(source, event, args) {
             console.log(source, event, args);
         }
@@ -37,6 +41,7 @@ describe('When explicit subscription is registered', () => {
         constructor(outlets) {
             super(outlets);
         }
+
         afterInit() {
         }
     }
@@ -46,7 +51,7 @@ describe('When explicit subscription is registered', () => {
         Plugster.explicitSubscriptions = undefined;
     });
 
-    it('should throw error when sub onNewMessage is missing', async() => {
+    it('should throw error when sub onNewMessage is missing', async () => {
 
         document.body.innerHTML = '<div data-controller-name="MyFirstPlugster"><div data-outlet-id="hiButton"></div></div><div data-controller-name="IncompletePlugster"></div>';
 
@@ -61,7 +66,7 @@ describe('When explicit subscription is registered', () => {
 
     });
 
-    it('should excecute subscriber onNewMessage method', async() => {
+    it('should excecute subscriber onNewMessage method', async () => {
 
         document.body.innerHTML = '<div data-controller-name="MyFirstPlugster"><div data-outlet-id="hiButton"></div></div><div data-controller-name="MySecondPlugster"></div>';
 
@@ -87,12 +92,14 @@ describe('When implicit subscription is registered', () => {
         constructor(outlets) {
             super(outlets);
         }
+
         afterInit() {
             let self = this;
             self._.hiButton.on('click', {}, () => {
                 self.dispatchEvent(self.myEvent.name, {message: 'Hi', nested: {message: 'Stranger'}, list: [1, 2, 3]});
             });
         }
+
         myEvent(data, callback) {
             this.registerEventSignature(this.myEvent.name, data, callback);
         }
@@ -111,7 +118,7 @@ describe('When implicit subscription is registered', () => {
         mySet.add(1);
         mySet.add(5);
         mySet.add('Some text');
-        myFirstPlugster.myEvent({id: 1, s: mySet}, function(e) {
+        myFirstPlugster.myEvent({id: 1, s: mySet}, function (e) {
             console.log(e.data);
         });
         myFirstPlugster._.hiButton.trigger('click');

@@ -4,6 +4,7 @@
 
 import {Plugster} from '../src/plugster.js';
 import $ from '../src/jquery.module.js';
+import 'regenerator-runtime/runtime';
 
 describe('When a new explicit plugster is instantiated', () => {
 
@@ -45,11 +46,11 @@ describe('When a new implicit plugster is instantiated', () => {
         }
     }
 
-    it('instance name should match its class name', () => {
+    it('instance name should match its class name', async () => {
 
         document.body.innerHTML = '<div data-controller-name="MyBasicPlugster"><span data-outlet-id="someOutlet"></span></div>';
 
-        let myPlugster = new MyBasicPlugster({someOutlet: {}});
+        let myPlugster = await new MyBasicPlugster({someOutlet: {}});
         expect(myPlugster.toString()).toBe('MyBasicPlugster');
 
     });
@@ -59,7 +60,7 @@ describe('When a new implicit plugster is instantiated', () => {
         document.body.innerHTML = '';
 
         expect(() => {
-            new MyBasicPlugster({});
+            new MyBasicPlugster({}).init();
         }).toThrow('There is no view with a MyBasicPlugster controller !!!');
 
     });
@@ -69,7 +70,7 @@ describe('When a new implicit plugster is instantiated', () => {
         document.body.innerHTML = '<div data-controller-name="MyBasicPlugster"></div>';
 
         expect(() => {
-            new MyBasicPlugster({someOutlet: {}});
+            new MyBasicPlugster({someOutlet: {}}).init();
         }).toThrow('Outlet someOutlet does not exist, check both MyBasicPlugster view and controller !!!');
 
     });
@@ -84,9 +85,9 @@ describe('When a new implicit plugster is instantiated', () => {
             }
         }
 
-        expect(() => {
-            new MissingAfterInitPlugster({});
-        }).toThrow('Every Plugster must implement its own afterInit method !!!');
+        expect(async () => {
+            await new MissingAfterInitPlugster({}).init();
+        }).rejects.toThrow('Every Plugster must implement its own afterInit method !!!');
 
     });
 
@@ -106,11 +107,11 @@ describe('When a plugster gets plugged', () => {
         Plugster.registry = undefined;
     });
 
-    it('must exists on window plugsters container', () => {
+    it('must exists on window plugsters container', async () => {
 
         document.body.innerHTML = '<div data-controller-name="MyBasicPlugster"><span data-outlet-id="someOutlet"></span></div>';
 
-        let myPlugster = new MyBasicPlugster({someOutlet: {}});
+        let myPlugster = await new MyBasicPlugster({someOutlet: {}}).init();
         Plugster.plug(myPlugster);
 
         expect(window['plugsters']).toHaveProperty(myPlugster.name.toLowerCase());
@@ -141,14 +142,14 @@ describe("When a view has the same outlet on nested controllers", () => {
         Plugster.registry = undefined;
     });
 
-    it('controller closest outlet should be linked', () => {
+    it('controller closest outlet should be linked', async () => {
 
         document.body.innerHTML = '<div data-controller-name="MyFristPlugster"><span data-outlet-id="someOutlet"></span><div data-controller-name="MySecondPlugster"><div data-outlet-id="someOutlet"></div></div></div>';
 
-        let myFristPlugster = new MyFristPlugster({someOutlet: {}});
+        let myFristPlugster = await new MyFristPlugster({someOutlet: {}}).init();
         Plugster.plug(myFristPlugster);
 
-        let mySecondPlugster = new MySecondPlugster({someOutlet: {}});
+        let mySecondPlugster = await new MySecondPlugster({someOutlet: {}}).init();
         Plugster.plug(mySecondPlugster);
 
         expect(myFristPlugster._.someOutlet.is('span')).toBe(true);

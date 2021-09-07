@@ -21,8 +21,6 @@ class Plugster extends Object {
         this.childTemplates = {};
 
         console.log(`${this.name} Controller Instantiated.`);
-
-        this.init();
     }
 
     static plug(me) {
@@ -82,15 +80,15 @@ class Plugster extends Object {
 
         console.log(`Initializing ${self.name} Controller.`);
 
-        let promises = self.bindOutlets();
-        if (promises.length === 0) {
-            console.log(`${self.name} Controller Initialized`);
-            self.afterInit();
-            return;
-        }
-        window.Promise.all(promises).then(function () {
-            console.log(`${self.name} Controller Initialized`);
-            self.afterInit();
+        let childTemplatesLoadPromises = self.bindOutlets();
+        return new window.Promise((resolve, reject) => {
+            return window.Promise.all(childTemplatesLoadPromises).then(function () {
+                console.log(`${self.name} Controller Initialized`);
+                self.afterInit();
+                resolve(self);
+            }).catch(e => {
+                reject(e);
+            });
         });
     }
 

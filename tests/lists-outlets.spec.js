@@ -4,7 +4,7 @@
 
 import {Plugster} from '../src/plugster.js';
 import $ from '../src/jquery.module.js';
-//import 'regenerator-runtime/runtime';
+import 'regenerator-runtime/runtime';
 
 describe('When a plugster has a list outlet', () => {
 
@@ -12,6 +12,7 @@ describe('When a plugster has a list outlet', () => {
         constructor(props) {
             super(props);
         }
+
         afterInit() {
         }
     }
@@ -31,9 +32,9 @@ describe('When a plugster has a list outlet', () => {
 
     });
 
-    it('should support list related methods', () => {
+    it('should support list related methods', async () => {
 
-        let myPlugster = new MyComplexPlugster({listOutlet: {}});
+        let myPlugster = await new MyComplexPlugster({listOutlet: {}}).init();
 
         expect(myPlugster._.listOutlet).toHaveProperty('buildListItem');
         expect(myPlugster._.listOutlet).toHaveProperty('count');
@@ -44,9 +45,9 @@ describe('When a plugster has a list outlet', () => {
 
     });
 
-    it('should support items addition', () => {
+    it('should support items addition', async () => {
 
-        let myPlugster = new MyComplexPlugster({listOutlet: {}});
+        let myPlugster = await new MyComplexPlugster({listOutlet: {}}).init();
 
         let itemData = {id: 1, name: 'Test'};
         let itemOutlets = myPlugster._.listOutlet.buildListItem(0, itemData.id, itemData, {
@@ -57,18 +58,18 @@ describe('When a plugster has a list outlet', () => {
 
     });
 
-    it('should support item click event', () => {
+    it('should support item click event', async () => {
 
         const spy = jest.spyOn(console, 'log').mockImplementation();
-        let myPlugster = new MyComplexPlugster({listOutlet: {}});
+        let myPlugster = await new MyComplexPlugster({listOutlet: {}}).init();
 
         let itemData = {id: 1, name: 'Test'};
         let itemOutlets = myPlugster._.listOutlet.buildListItem(0, itemData.id, itemData, {
             childOutlet: {}
-        }, function(key, data) {
+        }, function (key, data) {
             console.log(key, data);
         });
-        
+
         itemOutlets.childOutlet.text(itemData.name);
         itemOutlets.root.trigger('click');
 
@@ -76,9 +77,9 @@ describe('When a plugster has a list outlet', () => {
 
     });
 
-    it('should support item data retreival', () => {
+    it('should support item data retreival', async () => {
 
-        let myPlugster = new MyComplexPlugster({listOutlet: {}});
+        let myPlugster = await new MyComplexPlugster({listOutlet: {}}).init();
 
         let itemData = {id: 1, name: 'Test'};
         let itemOutlets = myPlugster._.listOutlet.buildListItem(0, itemData.id, itemData, {
@@ -90,9 +91,9 @@ describe('When a plugster has a list outlet', () => {
 
     });
 
-    it('should support item retreival', () => {
+    it('should support item retreival', async () => {
 
-        let myPlugster = new MyComplexPlugster({listOutlet: {}});
+        let myPlugster = await new MyComplexPlugster({listOutlet: {}}).init();
 
         let itemData = {id: 1, name: 'Test'};
         let itemOutlets = myPlugster._.listOutlet.buildListItem(0, itemData.id, itemData, {
@@ -104,9 +105,9 @@ describe('When a plugster has a list outlet', () => {
 
     });
 
-    it('should support item deletion', () => {
+    it('should support item deletion', async () => {
 
-        let myPlugster = new MyComplexPlugster({listOutlet: {}});
+        let myPlugster = await new MyComplexPlugster({listOutlet: {}}).init();
 
         let itemData = {id: 1, name: 'Test'};
         let itemOutlets = myPlugster._.listOutlet.buildListItem(0, itemData.id, itemData, {
@@ -118,9 +119,9 @@ describe('When a plugster has a list outlet', () => {
 
     });
 
-    it('should support all items deletion', () => {
+    it('should support all items deletion', async () => {
 
-        let myPlugster = new MyComplexPlugster({listOutlet: {}});
+        let myPlugster = await new MyComplexPlugster({listOutlet: {}}).init();
 
         let itemData = {id: 1, name: 'Test'};
         let itemOutlets = myPlugster._.listOutlet.buildListItem(0, itemData.id, itemData, {

@@ -16,7 +16,7 @@ A plugster is a standalone view controller, which can access in a clean way to a
 
 It can be any HTML element inside a page (even the body or the head section), but it is commonly a `<div>` element; and you can have as many "views" as you need inside the same HTML page.
 
-The wrapper recognize a view by the existence of a **data-controller-id** attribute which must contain the plugster name.
+The wrapper recognize a view by the existence of a **data-controller-name** attribute which must contain the plugster name.
 
 ```html
 <!DOCTYPE html>
@@ -337,15 +337,13 @@ For the development we depend on:
 
 - jest, for testing environment.
 - babel, for ES6 module testing.
-- rollup $ terser, for ES6 module distribution file generation. 
+- rollup & terser, for ES6 module distribution file generation. 
 
 ## Samples
 
-This repository includes one small samples using Flask (python).
+The samples repository is located at [https://github.com/paranoid-software/plugster-samples](https://github.com/paranoid-software/plugster-samples)
 
-The sample try to demonstrate the communication betwwen 3 plugsters using a Currency Rate Public API.
-
-The samples are located at the repo: TBD
+There you can play with one small sample which runs on Flask (python). The sample try to demonstrate the communication betwwen 3 plugsters using a public Currency Rate API.
 
 ### Real world sample
 

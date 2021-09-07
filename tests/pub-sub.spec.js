@@ -3,7 +3,6 @@
  **/
 
 import {Plugster} from '../src/plugster.js';
-import $ from '../src/jquery.module.js';
 import 'regenerator-runtime/runtime';
 
 describe('When explicit subscription is registered', () => {
@@ -103,7 +102,7 @@ describe('When implicit subscription is registered', () => {
         Plugster.registry = undefined;
     });
 
-    it('should execute own event', async () => {
+    it('should execute registered callback', async () => {
         document.body.innerHTML = '<div data-controller-name="MyFirstPlugster"><div data-outlet-id="hiButton"></div></div>';
         let myFirstPlugster = new MyFirstPlugster({hiButton: {}});
         Plugster.plug(await myFirstPlugster.init());

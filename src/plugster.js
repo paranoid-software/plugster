@@ -34,7 +34,7 @@ class Plugster extends Object {
 
         if (!allPlugstersRegistered) return;
         if (window['plugsters']) return;
-
+        console.log(Plugster.registry)
         // Binding HTML declared subscriptions
         Object.keys(Plugster.registry).map(function (plugsterKey) {
             let plugster = Plugster.registry[plugsterKey];

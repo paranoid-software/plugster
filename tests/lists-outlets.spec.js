@@ -2,8 +2,10 @@
  * @jest-environment jsdom
  **/
 
+import $ from 'jquery';
+window.$ = $;
+
 import {Plugster} from '../src/plugster.js';
-import $ from '../src/jquery.module.js';
 import 'regenerator-runtime/runtime';
 
 describe('When a plugster has a list outlet', () => {

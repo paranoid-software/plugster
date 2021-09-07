@@ -2,6 +2,9 @@
  * @jest-environment jsdom
  **/
 
+import $ from 'jquery';
+window.$ = $;
+
 import {Plugster} from '../src/plugster.js';
 import 'regenerator-runtime/runtime';
 

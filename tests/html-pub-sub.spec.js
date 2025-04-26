@@ -70,20 +70,6 @@ describe('When html subscription is registered', () => {
 
     });
 
-    it('should throw error when pub event is missing', async () => {
-
-        document.body.innerHTML = '<div data-controller-name="IncompletePlugster"><div data-outlet-id="hiButton"></div></div><div data-controller-name="MySecondPlugster" data-on-incompleteplugster-myevent="handleMyFirstPlugsterMyevent"></div>';
-
-        let incompletePlugster = await new IncompletePlugster({hiButton: {}}).init();
-        let mySecondPlugster = await new MySecondPlugster({}).init();
-
-        expect(() => {
-            Plugster.plug(incompletePlugster);
-            Plugster.plug(mySecondPlugster);
-        }).toThrow('There is no myevent event in incompleteplugster controller !!!');
-
-    });
-
     it('should ', async () => {
 
         document.body.innerHTML = '<div data-controller-name="MyFirstPlugster"><div data-outlet-id="hiButton"></div></div><div data-controller-name="MySecondPlugster" data-on-myfirstplugster-myevent="handleMyFirstPlugsterMyevent"></div>';

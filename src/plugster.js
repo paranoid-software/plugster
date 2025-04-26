@@ -3,35 +3,49 @@ class Plugster extends Object {
     constructor(outlets, controllerName) {
         super();
 
-        if (!Plugster.document) Plugster.document = $(document);
+        if (!Plugster.document) {
+            Plugster.document = $(document);
+        }
         if (!Plugster.registry) {
             Plugster.registry = {};
             $('[data-controller-name]').map(function (index, val) {
                 Plugster.registry[$(val).data('controllerName').toLowerCase()] = undefined;
             });
         }
-        if (!Plugster.explicitSubscriptions) Plugster.explicitSubscriptions = {};
-        if (!Plugster.htmlDeclaredSubscriptions) Plugster.htmlDeclaredSubscriptions = {};
+        if (!Plugster.explicitSubscriptions) {
+            Plugster.explicitSubscriptions = {};
+        }
+        if (!Plugster.htmlDeclaredSubscriptions) {
+            Plugster.htmlDeclaredSubscriptions = {};
+        }
+        if (!Plugster.eventQueue) {
+            Plugster.eventQueue = [];
+        }
 
         this.locales = {};
         this.name = controllerName || this.constructor.name;
         this._ = outlets;
         this.childTemplates = {};
 
-        console.log(`${this.name} Controller Instantiated.`);
+        console.info(`${this.name} Controller Instantiated.`);
     }
 
     static plug(me) {
-
         Plugster.registry[me.name.toLowerCase()] = me;
+        console.debug(`READY: ${me.name.toLowerCase()}`)
 
         let allPlugstersRegistered = true;
-        Object.keys(Plugster.registry).map(function (key) {
-            if (!Plugster.registry[key]) allPlugstersRegistered = false;
+        Object.keys(Plugster.registry).forEach(function (key) {
+            if (!Plugster.registry[key]) {
+                console.debug(`NOT READY YET: ${key}`)
+                allPlugstersRegistered = false;
+            }
         });
 
         if (!allPlugstersRegistered) return;
-        if (window['plugsters']) return;
+        console.debug('DONE')
+
+        //if (window['plugsters']) return;
 
         // Binding HTML declared subscriptions
         Object.keys(Plugster.registry).map(function (plugsterKey) {
@@ -46,20 +60,30 @@ class Plugster extends Object {
                 if (!plugster[methodName]) throw new Error(`There is no method ${methodName} within the ${plugster.name} controller !!!`);
                 let plugsterNameLowerCased = parts[1];
                 let eventNameLowerCased = parts[2];
-                if (!Plugster.registry[plugsterNameLowerCased]) throw new Error(`There is no ${plugsterNameLowerCased} controller !!!`);
-                let pubMethodsLowerCased = Object.getOwnPropertyNames(Object.getPrototypeOf(Plugster.registry[plugsterNameLowerCased])).map(methodName => {
+                let pubMethodsLowerCased = !Plugster.registry[plugsterNameLowerCased] ? [] : Object.getOwnPropertyNames(Object.getPrototypeOf(Plugster.registry[plugsterNameLowerCased])).map(methodName => {
                     return methodName.toLowerCase();
                 });
-                if (pubMethodsLowerCased.indexOf(eventNameLowerCased) < 0) throw new Error(`There is no ${eventNameLowerCased} event in ${plugsterNameLowerCased} controller !!!`);
-                Plugster.htmlDeclaredSubscriptions[`${plugsterNameLowerCased}_${eventNameLowerCased}_${plugster.name.toLowerCase()}`] = {
-                    listener: plugster,
-                    methodName: methodName
-                };
+                if (pubMethodsLowerCased.indexOf(eventNameLowerCased) >= 0) {
+                    Plugster.htmlDeclaredSubscriptions[`${plugsterNameLowerCased}_${eventNameLowerCased}_${plugster.name.toLowerCase()}`] = {
+                        listener: plugster,
+                        methodName: methodName
+                    };
+                }
             });
         });
 
         window['plugsters'] = Plugster.registry;
+        window['xyz'] = Plugster.htmlDeclaredSubscriptions;
 
+        Plugster.processEventQueue();
+
+    }
+
+    static processEventQueue() {
+        while (Plugster.eventQueue.length > 0) {
+            const { name, args, target } = Plugster.eventQueue.shift();
+            target.dispatchEvent(name, args);
+        }
     }
 
     setLocales(value) {
@@ -72,6 +96,11 @@ class Plugster extends Object {
         return this.locales[lang][text];
     }
 
+    // noinspection JSUnusedGlobalSymbols
+    outletOf(elem) {
+        return $(elem);
+    }
+
     toString() {
         return this.name;
     }
@@ -79,12 +108,12 @@ class Plugster extends Object {
     init() {
         let self = this;
 
-        console.log(`Initializing ${self.name} Controller.`);
+        console.info(`Initializing ${self.name} Controller.`);
 
         let childTemplatesLoadPromises = self.bindOutlets();
         return new window.Promise((resolve, reject) => {
             return window.Promise.all(childTemplatesLoadPromises).then(function () {
-                console.log(`${self.name} Controller Initialized`);
+                console.info(`${self.name} Controller Initialized`);
                 self.afterInit();
                 resolve(self);
             }).catch(e => {
@@ -101,7 +130,7 @@ class Plugster extends Object {
 
         let self = this;
 
-        console.log(`Binding Outlets for ${self.name} Controller.`);
+        console.debug(`Binding Outlets for ${self.name} Controller.`);
 
         let childTemplatesLoadPromises = [];
         let controllerSelectorSentence = `[data-controller-name=${self.name}]`;
@@ -112,7 +141,11 @@ class Plugster extends Object {
         $.map(self._, function (outlet, key) {
 
             let selector = `[data-outlet-id='${key}']`;
-            if (root.find(selector).length === 0) throw new Error(`Outlet ${key} does not exist, check both ${self.name} view and controller !!!`);
+            if (root.find(selector).length === 0) {
+                console.warn(`Outlet ${key} does not exist, check both ${self.name} view and controller and make sure is not intentional !!!`)
+                self._[key] = null;
+                return;
+            }
 
             let filteredOutlet = root.find(selector);
             if (filteredOutlet.length > 1) {
@@ -121,17 +154,27 @@ class Plugster extends Object {
                         return $(o);
                     return null;
                 });
+                if (filteredOutlets.length === 0) {
+                    console.warn(`Outlet ${key} does not exist, check both ${self.name} view and controller and make sure is not intentional !!!`)
+                    self._[key] = null;
+                    return;
+                }
                 filteredOutlet = filteredOutlets[0];
             }
 
             filteredOutlet.attr('id', `${self.name}_${key}`);
 
             if (filteredOutlet.data('child-templates')) {
-                filteredOutlet.buildListItem = function (withTemplateIndex, itemKey, jsonData, outletsSchema, itemClickCallback) {
+                filteredOutlet.buildListItem = function (withTemplateIndex, itemKey, jsonData, outletsSchema, atIndex=0, itemClickCallback= undefined) {
                     if (!this.items) this.items = {};
                     if (!this.items[itemKey]) this.items[itemKey] = {};
-                    this.append(self.childTemplates[`${key}_${withTemplateIndex}`]);
-                    let outlets = self.compileChildTemplate(key, this.children().length - 1, this.children().last(), outletsSchema);
+                    if (atIndex === 0) {
+                        this.prepend(self.childTemplates[`${key}_${withTemplateIndex}`]);
+                    }
+                    else {
+                        this.children().eq(atIndex - 1).after(self.childTemplates[`${key}_${withTemplateIndex}`]);
+                    }
+                    let outlets = self.compileChildTemplate(key, atIndex, atIndex === 0 ? this.children().first() : this.children().eq(atIndex), outletsSchema);
                     if (outlets === null) return null;
                     outlets.root.attr('data-key', itemKey);
                     if (itemClickCallback)
@@ -146,10 +189,17 @@ class Plugster extends Object {
                     if (!this.items) return 0;
                     return Object.keys(this.items).length;
                 };
+                filteredOutlet.setData = function (key, data) {
+                    if (!this.items) return;
+                    if (!this.items[key]) return;
+                    this.items[key].data = data;
+                };
                 filteredOutlet.getData = function (key) {
+                    if (!this.items || Object.keys(this.items).length === 0 || !this.items[key]) return null;
                     return this.items[key].data;
                 };
                 filteredOutlet.getOutlets = function (key) {
+                    if (!this.items || Object.keys(this.items).length === 0 || !this.items[key]) return null;
                     return this.items[key].outlets;
                 };
                 filteredOutlet.delete = function (key) {
@@ -160,6 +210,9 @@ class Plugster extends Object {
                     this.items = undefined;
                     this.children().remove();
                 };
+                filteredOutlet.getItems = function () {
+                    return this.items;
+                };
                 let templates = filteredOutlet.data('child-templates');
                 $.map(templates, function (childTemplate, index) {
                     let deferred = $.Deferred();
@@ -168,13 +221,19 @@ class Plugster extends Object {
                 });
             }
 
+            for (const prop in outlet) {
+                if (outlet.hasOwnProperty(prop)) {
+                    filteredOutlet[prop] = outlet[prop];
+                }
+            }
+
             self._[key] = filteredOutlet;
 
         });
 
         self._.root = root;
 
-        console.log(`Outlets for ${self.name} Controller were binded successfuly !!!`);
+        console.debug(`Outlets for ${self.name} Controller were binded successfuly !!!`);
 
         return childTemplatesLoadPromises;
 
@@ -182,9 +241,9 @@ class Plugster extends Object {
 
     loadChildTemplate(outletName, index, file, deferred) {
         let self = this;
-        $.get({url: file, cache: false}, function (html) {
+        $.get({url: file, cache: true}, function (html) {
             self.childTemplates[`${outletName}_${index}`] = html;
-            console.log(`Template ${file} loaded.`);
+            console.debug(`Template ${file} loaded.`);
             deferred.resolve();
         });
     }
@@ -195,8 +254,15 @@ class Plugster extends Object {
         let outlets = {};
         outlets.root = template;
         $.map(template.find('[data-child-outlet-id]'), function (outlet) {
-            $(outlet).attr('id', `${parentOutletId}_${$(outlet).data('child-outlet-id')}_${childIndex}`);
-            outlets[$(outlet).data('child-outlet-id')] = $(outlet);
+            if (!outletsSchema[$(outlet).data('child-outlet-id')]) throw new Error(`There is not child outlet under the name ${$(outlet).data('child-outlet-id')}`);
+            let filteredOutlet = $(outlet);
+            filteredOutlet.attr('id', `${parentOutletId}_${filteredOutlet.data('child-outlet-id')}_${childIndex}`);
+            for (const prop in outletsSchema[$(outlet).data('child-outlet-id')]) {
+                if (outletsSchema[$(outlet).data('child-outlet-id')].hasOwnProperty(prop)) {
+                    filteredOutlet[prop] = outletsSchema[$(outlet).data('child-outlet-id')][prop];
+                }
+            }
+            outlets[filteredOutlet.data('child-outlet-id')] = filteredOutlet;
         });
         return outlets;
     }
@@ -210,6 +276,10 @@ class Plugster extends Object {
     }
 
     dispatchEvent(name, args) {
+        if (!window['plugsters']) {
+            Plugster.eventQueue.push({ name, args, target: this });
+            return;
+        }
         let unreferencedArgs = this.cloneDeep(args);
         this.broadcastExplicitSubscriptionsMessages(name, unreferencedArgs);
         this.broadcastHtmlDeclaredSubscriptionsMessages(name, unreferencedArgs);
@@ -258,11 +328,13 @@ class Plugster extends Object {
     }
 
     // Explicit subscriptions enrollment, you will need a default listener on the subscriber called onNewMessage
-    // to use this kind of subscriptions
+    // to use this kind of subscription
+    // noinspection JSUnusedGlobalSymbols
     listenTo(pubPlugster, event) {
         Plugster.explicitSubscriptions[`${pubPlugster.name}_${event.name}_${this.name}`.toLowerCase()] = this;
     }
 
+    // noinspection JSUnusedGlobalSymbols
     static createView(controllerName, htmlTemplateFile, callback) {
         $.get({url: htmlTemplateFile, cache: false}, function (html) {
             callback(html.replace('[CONTROLLER_NAME]', controllerName));

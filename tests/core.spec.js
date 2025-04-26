@@ -69,14 +69,17 @@ describe('When a new implicit plugster is instantiated', () => {
 
     });
 
-    it('missing outlet should provoke an error', () => {
-
+    it('missing outlet should raise a warning', () => {
         document.body.innerHTML = '<div data-controller-name="MyBasicPlugster"></div>';
 
-        expect(() => {
-            new MyBasicPlugster({someOutlet: {}}).init();
-        }).toThrow('Outlet someOutlet does not exist, check both MyBasicPlugster view and controller !!!');
+        const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
 
+        const plugster = new MyBasicPlugster({ someOutlet: {} });
+        plugster.init();
+
+        expect(warnSpy).toHaveBeenCalledWith(`Outlet someOutlet does not exist, check both MyBasicPlugster view and controller and make sure is not intentional !!!`);
+
+        warnSpy.mockRestore(); // cleanup
     });
 
     it('missing afterInit method should provoke an error', () => {

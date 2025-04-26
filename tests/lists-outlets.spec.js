@@ -62,20 +62,19 @@ describe('When a plugster has a list outlet', () => {
 
     it('should support item click event', async () => {
 
-        const spy = jest.spyOn(console, 'log').mockImplementation();
+        const fn = jest.fn();
+
         let myPlugster = await new MyComplexPlugster({listOutlet: {}}).init();
 
         let itemData = {id: 1, name: 'Test'};
         let itemOutlets = myPlugster._.listOutlet.buildListItem(0, itemData.id, itemData, {
             childOutlet: {}
-        }, function (key, data) {
-            console.log(key, data);
-        });
+        }, 0, fn);
 
         itemOutlets.childOutlet.text(itemData.name);
         itemOutlets.root.trigger('click');
 
-        expect(spy).toHaveBeenLastCalledWith(itemData.id, itemData);
+        expect(fn).toHaveBeenLastCalledWith(itemData.id, itemData);
 
     });
 

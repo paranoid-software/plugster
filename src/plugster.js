@@ -21,6 +21,12 @@ class Plugster extends Object {
         if (!Plugster.eventQueue) {
             Plugster.eventQueue = [];
         }
+        if (!Plugster.childTemplateHtmlCache) {
+            Plugster.childTemplateHtmlCache = {};
+        }
+        if (!Plugster.childTemplateRequestCache) {
+            Plugster.childTemplateRequestCache = {};
+        }
 
         this.locales = {};
         this.name = controllerName || this.constructor.name;
@@ -32,18 +38,15 @@ class Plugster extends Object {
 
     static plug(me) {
         Plugster.registry[me.name.toLowerCase()] = me;
-        console.debug(`READY: ${me.name.toLowerCase()}`)
 
         let allPlugstersRegistered = true;
         Object.keys(Plugster.registry).forEach(function (key) {
             if (!Plugster.registry[key]) {
-                console.debug(`NOT READY YET: ${key}`)
                 allPlugstersRegistered = false;
             }
         });
 
         if (!allPlugstersRegistered) return;
-        console.debug('DONE')
 
         //if (window['plugsters']) return;
 
@@ -73,7 +76,6 @@ class Plugster extends Object {
         });
 
         window['plugsters'] = Plugster.registry;
-        window['xyz'] = Plugster.htmlDeclaredSubscriptions;
 
         Plugster.processEventQueue();
 
@@ -84,6 +86,87 @@ class Plugster extends Object {
             const { name, args, target } = Plugster.eventQueue.shift();
             target.dispatchEvent(name, args);
         }
+    }
+
+    static _plugsterNameFrom(instanceOrName) {
+        if (!instanceOrName) return '';
+        if (typeof instanceOrName === 'string') return instanceOrName.toLowerCase();
+        if (typeof instanceOrName === 'object' && instanceOrName.name) return String(instanceOrName.name).toLowerCase();
+        return '';
+    }
+
+    static unplug(instanceOrName, options = {}) {
+        const name = Plugster._plugsterNameFrom(instanceOrName);
+        if (!name) return false;
+
+        const instance = typeof instanceOrName === 'object' && instanceOrName
+            ? instanceOrName
+            : (Plugster.registry ? Plugster.registry[name] : null);
+        const removed = {
+            queue: 0,
+            explicitSubscriptions: 0,
+            htmlDeclaredSubscriptions: 0,
+            registry: 0,
+        };
+
+        if (instance) {
+            // Remove event handlers registered over the plugster instance via registerEventSignature.
+            $(instance).off();
+        }
+
+        // Drop queued events targeting this instance.
+        if (instance && Array.isArray(Plugster.eventQueue)) {
+            const before = Plugster.eventQueue.length;
+            Plugster.eventQueue = Plugster.eventQueue.filter(function (queuedEvent) {
+                return queuedEvent.target !== instance;
+            });
+            removed.queue = before - Plugster.eventQueue.length;
+        }
+
+        // Remove explicit subscriptions where this plugster is publisher or listener.
+        if (Plugster.explicitSubscriptions) {
+            Object.keys(Plugster.explicitSubscriptions).forEach(function (key) {
+                const subscription = Plugster.explicitSubscriptions[key];
+                const isPublisher = key.startsWith(`${name}_`);
+                const isListener = key.endsWith(`_${name}`);
+                if (subscription === instance || isPublisher || isListener) {
+                    delete Plugster.explicitSubscriptions[key];
+                    removed.explicitSubscriptions += 1;
+                }
+            });
+        }
+
+        // Remove HTML declared subscriptions where this plugster is publisher or listener.
+        if (Plugster.htmlDeclaredSubscriptions) {
+            Object.keys(Plugster.htmlDeclaredSubscriptions).forEach(function (key) {
+                const subscription = Plugster.htmlDeclaredSubscriptions[key];
+                const isPublisher = key.startsWith(`${name}_`);
+                const isListener = key.endsWith(`_${name}`);
+                if ((subscription && subscription.listener === instance) || isPublisher || isListener) {
+                    delete Plugster.htmlDeclaredSubscriptions[key];
+                    removed.htmlDeclaredSubscriptions += 1;
+                }
+            });
+        }
+
+        if (Plugster.registry && Object.prototype.hasOwnProperty.call(Plugster.registry, name)) {
+            delete Plugster.registry[name];
+            removed.registry = 1;
+        }
+
+        if (window['plugsters']) window['plugsters'] = Plugster.registry;
+
+        console.info('[Plugster] unplug', {
+            name: name,
+            reason: String(options.reason || '').trim() || 'unspecified',
+            removed,
+        });
+
+        if (options.destroy === true && instance && typeof instance.destroy === 'function') {
+            instance.destroy();
+        }
+
+        return true;
     }
 
     setLocales(value) {
@@ -168,6 +251,15 @@ class Plugster extends Object {
                 filteredOutlet.buildListItem = function (withTemplateIndex, itemKey, jsonData, outletsSchema, atIndex=0, itemClickCallback= undefined) {
                     if (!this.items) this.items = {};
                     if (!this.items[itemKey]) this.items[itemKey] = {};
+
+                    // Update indices of existing items that will be shifted BEFORE inserting
+                    // Items at atIndex or after need their indices incremented by 1
+                    for (let existingKey in this.items) {
+                        if (existingKey !== itemKey && this.items[existingKey].index >= atIndex) {
+                            this.items[existingKey].index += 1;
+                        }
+                    }
+
                     if (atIndex === 0) {
                         this.prepend(self.childTemplates[`${key}_${withTemplateIndex}`]);
                     }
@@ -183,6 +275,7 @@ class Plugster extends Object {
                         });
                     this.items[itemKey].outlets = outlets;
                     this.items[itemKey].data = jsonData;
+                    this.items[itemKey].index = atIndex;  // Track insertion position
                     return this.items[itemKey].outlets;
                 };
                 filteredOutlet.count = function () {
@@ -213,6 +306,71 @@ class Plugster extends Object {
                 filteredOutlet.getItems = function () {
                     return this.items;
                 };
+                filteredOutlet.getItemsAsArray = function () {
+                    if (!this.items) return [];
+
+                    // Convert dict to array, sorted by index
+                    return Object.values(this.items)
+                        .sort((a, b) => a.index - b.index);
+                };
+                filteredOutlet.moveItem = function (key, direction) {
+                    if (!this.items || !this.items[key]) {
+                        throw new Error(`Item with key "${key}" does not exist`);
+                    }
+
+                    // Get current index from stored data
+                    const currentIndex = this.items[key].index;
+                    const newIndex = currentIndex + direction;
+
+                    // Validate new position
+                    const totalItems = Object.keys(this.items).length;
+                    if (newIndex < 0) {
+                        throw new Error(`Cannot move item "${key}" to position ${newIndex}. Position must be >= 0`);
+                    }
+                    if (newIndex >= totalItems) {
+                        throw new Error(`Cannot move item "${key}" to position ${newIndex}. Position must be < ${totalItems}`);
+                    }
+
+                    // Same position, no-op
+                    if (newIndex === currentIndex) {
+                        return;
+                    }
+
+                    // Find the item at target position to swap indices
+                    let targetKey = null;
+                    for (let itemKey in this.items) {
+                        if (this.items[itemKey].index === newIndex) {
+                            targetKey = itemKey;
+                            break;
+                        }
+                    }
+
+                    if (!targetKey) {
+                        throw new Error(`No item found at target position ${newIndex}`);
+                    }
+
+                    // Get DOM elements
+                    const allChildren = Array.from(this[0].children);
+                    const currentItem = allChildren.find(child => child.getAttribute('data-key') === key);
+                    const targetItem = allChildren.find(child => child.getAttribute('data-key') === targetKey);
+
+                    if (!currentItem || !targetItem) {
+                        throw new Error(`DOM elements not found for move operation`);
+                    }
+
+                    // Move DOM element
+                    if (direction < 0) {
+                        // Move backwards (towards start)
+                        this[0].insertBefore(currentItem, targetItem);
+                    } else {
+                        // Move forwards (towards end)
+                        this[0].insertBefore(currentItem, targetItem.nextSibling);
+                    }
+
+                    // Swap indices in stored data
+                    this.items[key].index = newIndex;
+                    this.items[targetKey].index = currentIndex;
+                };
                 let templates = filteredOutlet.data('child-templates');
                 $.map(templates, function (childTemplate, index) {
                     let deferred = $.Deferred();
@@ -241,15 +399,66 @@ class Plugster extends Object {
 
     loadChildTemplate(outletName, index, file, deferred) {
         let self = this;
-        $.get({url: file, cache: true}, function (html) {
-            self.childTemplates[`${outletName}_${index}`] = html;
-            console.debug(`Template ${file} loaded.`);
+        let url = String(file || '').trim();
+        if (!url) {
+            deferred.reject(new Error('Child template url is required.'));
+            return;
+        }
+
+        let childTemplateKey = `${outletName}_${index}`;
+        let cachedHtml = Plugster.childTemplateHtmlCache[url];
+        if (typeof cachedHtml === 'string') {
+            self.childTemplates[childTemplateKey] = cachedHtml;
+            console.debug(`Template ${url} loaded from memory cache.`);
             deferred.resolve();
+            return;
+        }
+
+        let inFlightRequest = Plugster.childTemplateRequestCache[url];
+        if (inFlightRequest) {
+            inFlightRequest
+                .then(function (html) {
+                    self.childTemplates[childTemplateKey] = html;
+                    deferred.resolve();
+                })
+                .catch(function (err) {
+                    deferred.reject(err);
+                });
+            return;
+        }
+
+        let requestPromise = new window.Promise(function (resolve, reject) {
+            let completed = false;
+            let jqRequest = $.get({url: url, cache: true}, function (html) {
+                if (completed) return;
+                completed = true;
+                resolve(html);
+            });
+            if (jqRequest && typeof jqRequest.fail === 'function') {
+                jqRequest.fail(function (_xhr, _status, errorThrown) {
+                    if (completed) return;
+                    completed = true;
+                    reject(errorThrown instanceof Error ? errorThrown : new Error(`Failed to load template: ${url}`));
+                });
+            }
         });
+
+        Plugster.childTemplateRequestCache[url] = requestPromise;
+        requestPromise
+            .then(function (html) {
+                Plugster.childTemplateHtmlCache[url] = html;
+                delete Plugster.childTemplateRequestCache[url];
+                self.childTemplates[childTemplateKey] = html;
+                console.debug(`Template ${url} loaded.`);
+                deferred.resolve();
+            })
+            .catch(function (err) {
+                delete Plugster.childTemplateRequestCache[url];
+                deferred.reject(err);
+            });
     }
 
     compileChildTemplate(parentOutletId, childIndex, template, outletsSchema) {
-        // TODO: Validate schema compliance.
         if (!outletsSchema || Object.keys(outletsSchema).length === 0) return null;
         let outlets = {};
         outlets.root = template;
@@ -336,7 +545,7 @@ class Plugster extends Object {
 
     // noinspection JSUnusedGlobalSymbols
     static createView(controllerName, htmlTemplateFile, callback) {
-        $.get({url: htmlTemplateFile, cache: false}, function (html) {
+        $.get({url: htmlTemplateFile, cache: true}, function (html) {
             callback(html.replace('[CONTROLLER_NAME]', controllerName));
         });
     }

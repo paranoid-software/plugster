@@ -134,4 +134,151 @@ describe('When a plugster has a list outlet', () => {
 
     });
 
+    it('getItemsAsArray returns items sorted by insertion index', async () => {
+
+        let myPlugster = await new MyComplexPlugster({listOutlet: {}}).init();
+
+        myPlugster._.listOutlet.buildListItem(0, 'a', {label: 'a'}, {childOutlet: {}});
+        myPlugster._.listOutlet.buildListItem(0, 'b', {label: 'b'}, {childOutlet: {}}, 1);
+        myPlugster._.listOutlet.buildListItem(0, 'c', {label: 'c'}, {childOutlet: {}}, 2);
+
+        const arr = myPlugster._.listOutlet.getItemsAsArray();
+        expect(arr.map(i => i.data.label)).toEqual(['a', 'b', 'c']);
+
+    });
+
+    it('getItemsAsArray returns empty when no items have been added', async () => {
+
+        let myPlugster = await new MyComplexPlugster({listOutlet: {}}).init();
+
+        expect(myPlugster._.listOutlet.getItemsAsArray()).toEqual([]);
+
+    });
+
+    it('buildListItem shifts existing indices when inserting at the middle', async () => {
+
+        let myPlugster = await new MyComplexPlugster({listOutlet: {}}).init();
+
+        myPlugster._.listOutlet.buildListItem(0, 'a', {}, {childOutlet: {}});
+        myPlugster._.listOutlet.buildListItem(0, 'b', {}, {childOutlet: {}}, 1);
+        myPlugster._.listOutlet.buildListItem(0, 'middle', {}, {childOutlet: {}}, 1);
+
+        const items = myPlugster._.listOutlet.getItems();
+        expect(items.a.index).toBe(0);
+        expect(items.middle.index).toBe(1);
+        expect(items.b.index).toBe(2);
+
+        const domKeys = Array.from(myPlugster._.listOutlet[0].children)
+            .map(c => c.getAttribute('data-key'));
+        expect(domKeys).toEqual(['a', 'middle', 'b']);
+
+    });
+
+    it('buildListItem shifts every existing item when prepending at index 0', async () => {
+
+        let myPlugster = await new MyComplexPlugster({listOutlet: {}}).init();
+
+        myPlugster._.listOutlet.buildListItem(0, 'a', {}, {childOutlet: {}});
+        myPlugster._.listOutlet.buildListItem(0, 'b', {}, {childOutlet: {}}, 1);
+        myPlugster._.listOutlet.buildListItem(0, 'head', {}, {childOutlet: {}}, 0);
+
+        const items = myPlugster._.listOutlet.getItems();
+        expect(items.head.index).toBe(0);
+        expect(items.a.index).toBe(1);
+        expect(items.b.index).toBe(2);
+
+    });
+
+    it('moveItem swaps positions and DOM order when direction is +1', async () => {
+
+        let myPlugster = await new MyComplexPlugster({listOutlet: {}}).init();
+
+        myPlugster._.listOutlet.buildListItem(0, 'a', {}, {childOutlet: {}});
+        myPlugster._.listOutlet.buildListItem(0, 'b', {}, {childOutlet: {}}, 1);
+        myPlugster._.listOutlet.buildListItem(0, 'c', {}, {childOutlet: {}}, 2);
+
+        myPlugster._.listOutlet.moveItem('a', +1);
+
+        const items = myPlugster._.listOutlet.getItems();
+        expect(items.a.index).toBe(1);
+        expect(items.b.index).toBe(0);
+        expect(items.c.index).toBe(2);
+
+        const domKeys = Array.from(myPlugster._.listOutlet[0].children)
+            .map(c => c.getAttribute('data-key'));
+        expect(domKeys).toEqual(['b', 'a', 'c']);
+
+    });
+
+    it('moveItem swaps positions and DOM order when direction is -1', async () => {
+
+        let myPlugster = await new MyComplexPlugster({listOutlet: {}}).init();
+
+        myPlugster._.listOutlet.buildListItem(0, 'a', {}, {childOutlet: {}});
+        myPlugster._.listOutlet.buildListItem(0, 'b', {}, {childOutlet: {}}, 1);
+        myPlugster._.listOutlet.buildListItem(0, 'c', {}, {childOutlet: {}}, 2);
+
+        myPlugster._.listOutlet.moveItem('c', -1);
+
+        const items = myPlugster._.listOutlet.getItems();
+        expect(items.a.index).toBe(0);
+        expect(items.b.index).toBe(2);
+        expect(items.c.index).toBe(1);
+
+        const domKeys = Array.from(myPlugster._.listOutlet[0].children)
+            .map(c => c.getAttribute('data-key'));
+        expect(domKeys).toEqual(['a', 'c', 'b']);
+
+    });
+
+    it('moveItem with direction 0 is a no-op', async () => {
+
+        let myPlugster = await new MyComplexPlugster({listOutlet: {}}).init();
+
+        myPlugster._.listOutlet.buildListItem(0, 'a', {}, {childOutlet: {}});
+        myPlugster._.listOutlet.buildListItem(0, 'b', {}, {childOutlet: {}}, 1);
+
+        myPlugster._.listOutlet.moveItem('a', 0);
+
+        const items = myPlugster._.listOutlet.getItems();
+        expect(items.a.index).toBe(0);
+        expect(items.b.index).toBe(1);
+
+    });
+
+    it('moveItem throws for an unknown key', async () => {
+
+        let myPlugster = await new MyComplexPlugster({listOutlet: {}}).init();
+
+        myPlugster._.listOutlet.buildListItem(0, 'a', {}, {childOutlet: {}});
+
+        expect(() => myPlugster._.listOutlet.moveItem('ghost', +1))
+            .toThrow('Item with key "ghost" does not exist');
+
+    });
+
+    it('moveItem throws when target index is below zero', async () => {
+
+        let myPlugster = await new MyComplexPlugster({listOutlet: {}}).init();
+
+        myPlugster._.listOutlet.buildListItem(0, 'a', {}, {childOutlet: {}});
+        myPlugster._.listOutlet.buildListItem(0, 'b', {}, {childOutlet: {}}, 1);
+
+        expect(() => myPlugster._.listOutlet.moveItem('a', -1))
+            .toThrow('Position must be >= 0');
+
+    });
+
+    it('moveItem throws when target index is past the last position', async () => {
+
+        let myPlugster = await new MyComplexPlugster({listOutlet: {}}).init();
+
+        myPlugster._.listOutlet.buildListItem(0, 'a', {}, {childOutlet: {}});
+        myPlugster._.listOutlet.buildListItem(0, 'b', {}, {childOutlet: {}}, 1);
+
+        expect(() => myPlugster._.listOutlet.moveItem('a', +5))
+            .toThrow('Position must be < 2');
+
+    });
+
 });

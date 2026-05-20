@@ -131,6 +131,40 @@ class MyPlugster extends Plugster {
 }
 ```
 
+### List item positioning
+
+The full signature of `buildListItem` is:
+
+```javascript
+listOutlet.buildListItem(withTemplateIndex, itemKey, jsonData, outletsSchema, atIndex = 0, itemClickCallback = undefined);
+```
+
+The fifth argument `atIndex` controls where the new item is inserted (default `0`, i.e. the beginning of the list). When inserting at a position already occupied, existing items at that position and beyond are shifted forward by one. Each item keeps its current position in `items[key].index`.
+
+```javascript
+self._.ratesList.buildListItem(0, 'eur', eurData, schema);              // index 0
+self._.ratesList.buildListItem(0, 'usd', usdData, schema, 1);           // index 1, after eur
+self._.ratesList.buildListItem(0, 'cop', copData, schema, 1);           // inserts at 1; usd shifts to 2
+```
+
+Two helpers expose the current ordering and let you reorder items after insertion:
+
+- `listOutlet.getItemsAsArray()` returns the items as an array sorted by `index` (each entry has `outlets`, `data`, `index`). Use this when DOM order matters — `getItems()` returns a dictionary with no guaranteed iteration order.
+- `listOutlet.moveItem(key, direction)` swaps the item identified by `key` with the one at `currentIndex + direction`, updating both the DOM and the stored indices. `direction` is typically `+1` or `-1`. Throws if the key does not exist or if the resulting position would fall outside `[0, count)`.
+
+```javascript
+self._.ratesList.moveItem('cop', +1);   // swap cop with the item below it
+self._.ratesList.moveItem('cop', -1);   // swap cop with the item above it
+
+self._.ratesList.getItemsAsArray().forEach(item => {
+    console.log(item.index, item.data);
+});
+```
+
+### Child template caching
+
+Child template HTML is fetched once per URL and cached in memory for the lifetime of the page. If several plugsters declare the same template URL in their `data-child-templates`, only the first triggers an HTTP request; the rest read from the cache (or from the in-flight request if they request it concurrently). This is transparent — no opt-in is required.
+
 ## Plugster Boilerplate
 
 ```javascript
@@ -307,9 +341,52 @@ class MyPlugsterC extends Plugster {
 
 - That's it !!, every time Plugster A dispatch an event using ```this.dispatchEvent(this.valueChanged.name, {someProperty: someValue})``` both target plugsters will recevice the data dispatched on its listeners.
 
+## Plugster lifecycle
+
+Plugsters are normally created once at page load and live for as long as the page does. For long-lived single-page applications, or when a region of the DOM is replaced and rebuilt, you can tear down a plugster cleanly with `Plugster.unplug`.
+
+```javascript
+Plugster.unplug(plugsterOrName, options);
+```
+
+The first argument is either the plugster instance or its name (case-insensitive). `unplug` performs the following:
+
+- Removes any handler attached to the instance via `registerEventSignature`.
+- Drops queued events targeting the instance (events that were dispatched before `Plugster.plug` ran).
+- Removes every explicit subscription where the instance is publisher or listener.
+- Removes every HTML-declared subscription where the instance is publisher or listener.
+- Removes the entry from `Plugster.registry` and from the `window.plugsters` mirror.
+
+Returns `true` on success, `false` if the argument cannot be resolved to a plugster name.
+
+```javascript
+// Tear down a plugster that responded to a route change.
+Plugster.unplug(myEditor, { reason: 'route-change' });
+
+// You can also pass the name as a string.
+Plugster.unplug('MyEditor');
+```
+
+If the plugster needs to release resources of its own (clear timers, detach observers, etc.), define a `destroy()` method on the class and pass `{ destroy: true }`:
+
+```javascript
+class MyEditor extends Plugster {
+    afterInit() {
+        this.timer = setInterval(() => this.tick(), 1000);
+    }
+    destroy() {
+        clearInterval(this.timer);
+    }
+}
+
+Plugster.unplug(myEditor, { destroy: true, reason: 'navigation' });
+```
+
+The `reason` field is purely informational — it ends up in the console log entry that `unplug` writes, which helps when auditing teardowns in the browser devtools.
+
 ## Repository Content
 
-In this repository we have 2 versions for the wrapper; the main version is written using ES6 standard and it is located at the "es6" folder. But we also publish a version based on the "Revealing Module Pattern" in case we need to work in a legacy project based on that pattern.
+The library is written as a single ES6 module. The source lives in `src/`, tests in `tests/`, and the build output (committed) in `dist/`.
 
 ```lang-none
 plugster
@@ -327,7 +404,34 @@ plugster
 
 ## CDN thanks to jsdelivr
 
-[https://cdn.jsdelivr.net/gh/paranoid-software/plugster@1.0.12/dist/plugster.min.js](https://cdn.jsdelivr.net/gh/paranoid-software/plugster@1.0.12/dist/plugster.min.js)
+[https://cdn.jsdelivr.net/gh/paranoid-software/plugster@1.0.14/dist/plugster.min.js](https://cdn.jsdelivr.net/gh/paranoid-software/plugster@1.0.14/dist/plugster.min.js)
+
+## Release process
+
+Releases are cut by hand. Plugster is **not** published to npm — distribution happens through GitHub tags resolved by jsdelivr (`cdn.jsdelivr.net/gh/paranoid-software/plugster@<tag>/dist/plugster.min.js`), so the **tag is the release**.
+
+### Branch model
+
+- `main` only contains released code. Never commit directly to `main`.
+- `develop` is the working branch. All changes land there first.
+- Every release ships through a PR `develop → main`.
+
+### Cutting a release
+
+1. **Work on `develop`.** Commit the release content there.
+2. **Bump `package.json` `version`** to the next number (e.g. `1.0.14`) as part of the same set of commits. From `1.0.14` onwards, `package.json` is kept in sync with the released tag.
+3. **Rebuild `dist/`:** `npm run build`. The regenerated `dist/plugster.js`, `dist/plugster.min.js`, and `dist/plugster.min.js.map` are committed — jsdelivr serves `dist/` directly from the tag.
+4. **Tests must pass:** `npm test`.
+5. **Push `develop`** and open a PR `develop → main` on GitHub.
+6. **Merge the PR** into `main`.
+7. **Create the GitHub Release.** In the GitHub UI: Releases → "Draft a new release" → "Choose a tag" → type the new tag name (e.g. `1.0.14`) → "Create new tag: 1.0.14 on publish" → Target: `main` → write the notes → Publish. GitHub creates the tag at the tip of `main` when you click Publish. **Do not create the tag manually from the local CLI.**
+
+After publishing, update consumers that pin the CDN URL (the paranoid.software portal, downstream apps) to the new tag.
+
+### Historical notes
+
+- Tags `1.0.6`–`1.0.13` are **lightweight** (pushed from local before the Release was opened); from `1.0.14` onwards the GitHub Release UI creates the tag (annotated).
+- `package.json` `version` was left at `"1.0.11"` across releases `1.0.11`–`1.0.13`; from `1.0.14` onwards it is bumped every release.
 
 ## Library Dependencies and Development Dependencies
 

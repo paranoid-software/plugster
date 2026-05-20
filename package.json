@@ -1,6 +1,6 @@
 {
   "name": "plugster",
-  "version": "1.0.11",
+  "version": "1.0.14",
   "description": "Plugster is a wrapper for those who still consider jQuery as their preferred JavaScript library.",
   "main": "src/plugster.js",
   "scripts": {
